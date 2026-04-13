@@ -1,32 +1,206 @@
 ﻿@model IEnumerable<TechMoveGLMS.Models.ServiceRequest>
+@using TechMoveGLMS.Models
+
 @{
     ViewData["Title"] = "Service Requests";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-semibold"><i class="fas fa-headset me-2"></i>Service Requests</h2>
-    <a asp-action="Create" class="btn btn-primary rounded-pill"><i class="fas fa-plus me-1"></i> New Request</a>
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+    <h2 class="fw-semibold" style="color: #34495E;">
+        <i class="fas fa-headset me-2"></i>Service Requests
+    </h2>
+    <a asp-action="Create" class="btn btn-primary rounded-pill">
+        <i class="fas fa-plus me-1"></i> New Request
+    </a>
 </div>
 
 <div class="card">
     <div class="card-body p-0">
         <table class="table table-hover mb-0">
             <thead>
-                <tr><th>Contract</th><th>Description</th><th>Cost (USD)</th><th>Cost (ZAR)</th><th>Status</th><th>Date</th></tr>
+                <tr>
+                    <th>Contract</th>
+                    <th>Description</th>
+                    <th>Cost (USD)</th>
+                    <th>Cost (ZAR)</th>
+                    <th>Status</th>
+                    <th>Created Date</th>
+                    <th>Update Status</th>
+                    <th style="width: 80px">Actions</th>
+                </tr>
             </thead>
             <tbody>
-                @foreach (var sr in Model)
+                @foreach (var request in Model)
                 {
-                    <tr>
-                        <td>@sr.Contract?.ServiceLevel</td>
-                        <td>@sr.Description</td>
-                        <td>$@sr.CostUSD.ToString("N2")</td>
-                        <td>R@sr.CostZAR.ToString("N2")</td>
-                        <td><span class="badge-status">@sr.Status</span></td>
-                        <td>@sr.CreatedDate.ToShortDateString()</td>
+                    // Determine badge class
+                    string badgeClass = "bg-secondary text-white";
+                    switch (request.Status)
+                    {
+                        case ServiceRequestStatus.Pending:
+                            badgeClass = "bg-warning text-dark";
+                            break;
+                        case ServiceRequestStatus.Approved:
+                            badgeClass = "bg-success text-white";
+                            break;
+                        case ServiceRequestStatus.Completed:
+                            badgeClass = "bg-info text-dark";
+                            break;
+                        case ServiceRequestStatus.Cancelled:
+                            badgeClass = "bg-danger text-white";
+                            break;
+                    }
+
+                    <tr id="row-@request.ServiceRequestId">
+                        <td class="fw-semibold">@request.Contract?.ServiceLevel</td>
+                        <td>@request.Description</td>
+                        <td>$@request.CostUSD.ToString("N2")</td>
+                        <td>R @request.CostZAR.ToString("N2")</td>
+                        <td>
+                            <span id="status-badge-@request.ServiceRequestId" class="badge @badgeClass px-3 py-2 rounded-pill">
+                                @request.Status
+                            </span>
+                        </td>
+                        <td>@request.CreatedDate.ToShortDateString()</td>
+                        <td>
+                            <select id="status-@request.ServiceRequestId" class="form-select form-select-sm" style="width: 130px;"
+                                    data-current-status="@((int)request.Status)"
+                                    onchange="updateStatus(@request.ServiceRequestId, this.value)">
+                                <option value="0">Pending</option>
+                                <option value="1">Approved</option>
+                                <option value="2">Completed</option>
+                                <option value="3">Cancelled</option>
+                            </select>
+                        </td>
+                        <td>
+                            <a asp-action="Delete" asp-route-id="@request.ServiceRequestId" class="btn btn-sm btn-outline-danger rounded-pill" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
 </div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="fas fa-headset fa-3x text-secondary mb-3"></i>
+        <p class="text-secondary">No service requests found. Click "New Request" to add one.</p>
+    </div>
+}
+
+<!-- Hidden anti-forgery token for AJAX requests -->
+<form id="antiForgeryForm" style="display:none;">
+    @Html.AntiForgeryToken()
+</form>
+
+@section Scripts {
+    <script>
+        // Set the correct selected option for each dropdown on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            var selects = document.querySelectorAll('select[id^="status-"]');
+            selects.forEach(function(select) {
+                var currentStatus = select.getAttribute('data-current-status');
+                if (currentStatus !== null) {
+                    select.value = currentStatus;
+                }
+            });
+        });
+
+        async function updateStatus(id, statusValue) {
+            var status = parseInt(statusValue);
+            var select = document.getElementById('status-' + id);
+            var originalValue = select.value;
+            select.disabled = true;
+
+            // Get the anti-forgery token from the hidden form
+            var token = '';
+            var tokenInput = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]');
+            if (tokenInput) {
+                token = tokenInput.value;
+            }
+
+            try {
+                var response = await fetch('/ServiceRequests/UpdateStatus/' + id + '?status=' + status, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    }
+                });
+
+                var data = await response.json();
+
+                if (data.success) {
+                    // Update badge text
+                    var badge = document.getElementById('status-badge-' + id);
+                    var statusText = select.options[select.selectedIndex].text;
+                    badge.textContent = statusText;
+
+                    // Update badge color
+                    var badgeClass = '';
+                    switch(status) {
+                        case 0: badgeClass = 'bg-warning text-dark'; break;
+                        case 1: badgeClass = 'bg-success text-white'; break;
+                        case 2: badgeClass = 'bg-info text-dark'; break;
+                        case 3: badgeClass = 'bg-danger text-white'; break;
+                        default: badgeClass = 'bg-secondary text-white';
+                    }
+                    badge.className = 'badge ' + badgeClass + ' px-3 py-2 rounded-pill';
+
+                    // Update the data-current-status attribute
+                    select.setAttribute('data-current-status', status);
+
+                    // Show success message
+                    showMessage(data.message, 'success');
+                } else {
+                    showMessage('Failed: ' + data.message, 'danger');
+                    select.value = originalValue;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('An error occurred. Please try again.', 'danger');
+                select.value = originalValue;
+            } finally {
+                select.disabled = false;
+            }
+        }
+
+        function showMessage(message, type) {
+            // Remove any existing alerts
+            var existingAlerts = document.querySelectorAll('.alert-dismissible');
+            existingAlerts.forEach(function(alert) {
+                alert.remove();
+            });
+
+            // Create new alert
+            var alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-' + type + ' alert-dismissible fade show';
+            alertDiv.role = 'alert';
+            alertDiv.innerHTML = '<i class="fas ' + (type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle') + ' me-2"></i>' + message + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+
+            // Insert at the top of the container
+            var container = document.querySelector('.container');
+            if (container) {
+                container.insertBefore(alertDiv, container.firstChild);
+            }
+
+            // Auto-remove after 3 seconds
+            setTimeout(function() {
+                if (alertDiv && alertDiv.remove) {
+                    alertDiv.remove();
+                }
+            }, 3000);
+        }
+    </script>
+}

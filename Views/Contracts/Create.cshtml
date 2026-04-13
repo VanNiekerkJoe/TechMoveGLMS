@@ -1,47 +1,133 @@
 ﻿@model TechMoveGLMS.Models.Contract
+
 @{
     ViewData["Title"] = "New Contract";
+}
+
+<!-- Display success or error messages -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (!ViewData.ModelState.IsValid && ViewData.ModelState.Values.SelectMany(v => v.Errors).Any())
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Please correct the following errors:</strong>
+        <ul>
+            @foreach (var modelState in ViewData.ModelState.Values)
+            {
+                foreach (var error in modelState.Errors)
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            }
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 }
 
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="card">
-            <div class="card-header bg-white fw-bold">Contract Details</div>
+            <div class="card-header bg-white fw-bold">
+                <i class="fas fa-file-signature me-2"></i>Create New Contract
+            </div>
             <div class="card-body">
-                <form asp-action="Create" enctype="multipart/form-data">
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                <form asp-action="Create" enctype="multipart/form-data" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <!-- Client Dropdown -->
                     <div class="mb-3">
-                        <label asp-for="ClientId" class="form-label"></label>
-                        <select asp-for="ClientId" asp-items="ViewBag.ClientId" class="form-select"></select>
+                        <label asp-for="ClientId" class="form-label fw-semibold">Client</label>
+                        <select asp-for="ClientId" class="form-select" asp-items="ViewBag.ClientId">
+                            <option value="">-- Select Client --</option>
+                        </select>
+                        <span asp-validation-for="ClientId" class="text-danger"></span>
                     </div>
+
+                    <!-- Date Range -->
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="StartDate"></label>
+                            <label asp-for="StartDate" class="form-label fw-semibold">Start Date</label>
                             <input asp-for="StartDate" class="form-control" type="date" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="EndDate"></label>
+                            <label asp-for="EndDate" class="form-label fw-semibold">End Date</label>
                             <input asp-for="EndDate" class="form-control" type="date" />
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
                         </div>
                     </div>
+
+                    <!-- Status Dropdown -->
                     <div class="mb-3">
-                        <label asp-for="Status"></label>
-                        <select asp-for="Status" asp-items="Html.GetEnumSelectList<ContractStatus>()" class="form-select"></select>
+                        <label asp-for="Status" class="form-label fw-semibold">Contract Status</label>
+                        <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<ContractStatus>()"></select>
+                        <span asp-validation-for="Status" class="text-danger"></span>
                     </div>
+
+                    <!-- Service Level -->
                     <div class="mb-3">
-                        <label asp-for="ServiceLevel"></label>
-                        <input asp-for="ServiceLevel" class="form-control" placeholder="e.g. Premium, Standard" />
+                        <label asp-for="ServiceLevel" class="form-label fw-semibold">Service Level</label>
+                        <input asp-for="ServiceLevel" class="form-control" placeholder="e.g., Premium, Standard, Basic" />
+                        <span asp-validation-for="ServiceLevel" class="text-danger"></span>
                     </div>
-                    <div class="mb-3">
-                        <label>Signed Agreement (PDF only)</label>
-                        <input type="file" name="signedAgreement" accept=".pdf" class="form-control" />
+
+                    <!-- PDF File Upload -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Signed Agreement (PDF)</label>
+                        <input type="file" name="signedAgreement" id="signedAgreement" accept=".pdf" class="form-control" />
+                        <small class="text-muted">Only PDF files are accepted. Maximum size: 10MB</small>
+                        <span id="fileError" class="text-danger"></span>
                     </div>
+
+                    <hr />
+
+                    <!-- Buttons -->
                     <div class="d-flex justify-content-between">
-                        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">Cancel</a>
-                        <button type="submit" class="btn btn-primary rounded-pill">Create Contract</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4">
+                            <i class="fas fa-save me-1"></i>Create Contract
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Client-side file validation
+        document.getElementById('signedAgreement').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const fileError = document.getElementById('fileError');
+
+            if (file) {
+                const fileName = file.name;
+                const fileExtension = fileName.split('.').pop().toLowerCase();
+                const fileSize = file.size / 1024 / 1024; // in MB
+
+                if (fileExtension !== 'pdf') {
+                    fileError.textContent = 'Only PDF files are allowed!';
+                    e.target.value = '';
+                } else if (fileSize > 10) {
+                    fileError.textContent = 'File size cannot exceed 10MB!';
+                    e.target.value = '';
+                } else {
+                    fileError.textContent = '';
+                }
+            }
+        });
+    </script>
+}

@@ -1,36 +1,99 @@
 ﻿@model TechMoveGLMS.Models.ServiceRequest
+
 @{
     ViewData["Title"] = "New Service Request";
-    var exchangeRate = ViewBag.ExchangeRate ?? 16.55m;
+    var exchangeRate = ViewBag.ExchangeRate ?? 19.00m;
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (!ViewData.ModelState.IsValid && ViewData.ModelState.Values.SelectMany(v => v.Errors).Any())
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Please correct the following errors:</strong>
+        <ul>
+            @foreach (var modelState in ViewData.ModelState.Values)
+            {
+                foreach (var error in modelState.Errors)
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            }
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 }
 
 <div class="row justify-content-center">
     <div class="col-md-7">
         <div class="card">
-            <div class="card-header bg-white fw-bold">Create Service Request <span class="badge bg-info text-dark ms-2">Live USD/ZAR: @exchangeRate.ToString("N4")</span></div>
+            <div class="card-header bg-white fw-bold">
+                <i class="fas fa-headset me-2"></i>Create Service Request
+                <span class="badge bg-info text-dark ms-2">
+                    <i class="fas fa-exchange-alt me-1"></i>Live USD/ZAR: @exchangeRate.ToString("N4")
+                </span>
+            </div>
             <div class="card-body">
-                <form asp-action="Create">
+                <form asp-action="Create" method="post" id="serviceRequestForm">
+                    @Html.AntiForgeryToken()
+
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <!-- Contract Dropdown -->
                     <div class="mb-3">
-                        <label asp-for="ContractId" class="form-label"></label>
-                        <select asp-for="ContractId" asp-items="ViewBag.ContractId" class="form-select"></select>
+                        <label asp-for="ContractId" class="form-label fw-semibold">Contract</label>
+                        <select asp-for="ContractId" class="form-select" asp-items="ViewBag.ContractId">
+                            <option value="">-- Select Contract --</option>
+                        </select>
+                        <span asp-validation-for="ContractId" class="text-danger"></span>
                     </div>
+
+                    <!-- Description -->
                     <div class="mb-3">
-                        <label asp-for="Description" class="form-label"></label>
-                        <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+                        <label asp-for="Description" class="form-label fw-semibold">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe the service request..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
+
+                    <!-- USD Amount -->
                     <div class="mb-3">
-                        <label asp-for="CostUSD" class="form-label">Amount (USD)</label>
-                        <input asp-for="CostUSD" id="costUSD" class="form-control" step="0.01" placeholder="0.00" />
+                        <label asp-for="CostUSD" class="form-label fw-semibold">Amount (USD)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input asp-for="CostUSD" id="CostUSD" class="form-control" step="0.01" placeholder="0.00" value="0" />
+                        </div>
+                        <span asp-validation-for="CostUSD" class="text-danger"></span>
                     </div>
-                    <input type="hidden" asp-for="CostZAR" id="costZAR" />
+
+                    <!-- Hidden ZAR field - using name attribute to avoid formatting issues -->
+                    <input type="hidden" name="CostZAR" id="CostZAR" value="0" />
+
+                    <!-- ZAR Display -->
                     <div class="mb-4">
-                        <label class="form-label">Amount (ZAR) – estimated</label>
-                        <input id="estimatedZAR" class="form-control bg-light" readonly placeholder="Will auto-calculate" />
+                        <label class="form-label fw-semibold">Amount (ZAR) – Estimated</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R</span>
+                            <input id="estimatedZAR" class="form-control bg-light" readonly placeholder="Will auto-calculate" />
+                        </div>
+                        <small class="text-muted">Exchange rate: 1 USD = @exchangeRate.ToString("N4") ZAR</small>
                     </div>
+
+                    <hr />
+
+                    <!-- Buttons -->
                     <div class="d-flex justify-content-between">
-                        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">Cancel</a>
-                        <button type="submit" class="btn btn-primary rounded-pill">Create Request</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4">
+                            <i class="fas fa-save me-1"></i>Create Request
+                        </button>
                     </div>
                 </form>
             </div>
@@ -39,19 +102,38 @@
 </div>
 
 @section Scripts {
-    <script>
-        const rate = @exchangeRate;
-        const usdInput = document.getElementById('costUSD');
-        const zarHidden = document.getElementById('costZAR');
-        const estimated = document.getElementById('estimatedZAR');
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 
-        function updateZar() {
-            let usd = parseFloat(usdInput.value) || 0;
-            let zar = usd * rate;
-            estimated.value = zar.toFixed(2);
-            zarHidden.value = zar.toFixed(2);
+    <script>
+        // Get exchange rate
+        var exchangeRate = parseFloat(@exchangeRate.ToString().Replace(",", "."));
+
+        // Get elements
+        var usdInput = document.getElementById('CostUSD');
+        var zarHidden = document.getElementById('CostZAR');
+        var estimatedZar = document.getElementById('estimatedZAR');
+
+        // Function to update ZAR calculation
+        function updateZarCalculation() {
+            var usdAmount = parseFloat(usdInput.value) || 0;
+            var zarAmount = usdAmount * exchangeRate;
+            var zarValue = zarAmount.toFixed(2);
+
+            estimatedZar.value = zarValue;
+            zarHidden.value = zarValue;
+
+            console.log('USD: ' + usdAmount + ' -> ZAR: ' + zarValue);
         }
-        usdInput.addEventListener('input', updateZar);
-        updateZar();
+
+        // Add event listeners
+        if (usdInput) {
+            usdInput.addEventListener('input', updateZarCalculation);
+            usdInput.addEventListener('change', updateZarCalculation);
+        }
+
+        // Run initial calculation
+        updateZarCalculation();
     </script>
 }

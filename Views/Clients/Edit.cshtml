@@ -1,34 +1,35 @@
 ﻿@model TechMoveGLMS.Models.Client
 
 @{
-    ViewData["Title"] = "New Client";
+    ViewData["Title"] = "Edit Client";
 }
 
 <div class="row justify-content-center">
     <div class="col-md-6">
         <div class="card">
             <div class="card-header bg-white fw-bold">
-                <i class="fas fa-user-plus me-2"></i>Create New Client
+                <i class="fas fa-user-edit me-2"></i>Edit Client
             </div>
             <div class="card-body">
-                <form asp-action="Create">
+                <form asp-action="Edit">
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                    <input type="hidden" asp-for="ClientId" />
 
                     <div class="mb-3">
                         <label asp-for="Name" class="form-label fw-semibold">Client Name</label>
-                        <input asp-for="Name" class="form-control" placeholder="Enter company name" />
+                        <input asp-for="Name" class="form-control" />
                         <span asp-validation-for="Name" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
                         <label asp-for="ContactDetails" class="form-label fw-semibold">Contact Details</label>
-                        <input asp-for="ContactDetails" class="form-control" placeholder="Email | Phone" />
+                        <input asp-for="ContactDetails" class="form-control" />
                         <span asp-validation-for="ContactDetails" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
                         <label asp-for="Region" class="form-label fw-semibold">Region</label>
-                        <input asp-for="Region" class="form-control" placeholder="e.g., Gauteng, Western Cape" />
+                        <input asp-for="Region" class="form-control" />
                         <span asp-validation-for="Region" class="text-danger"></span>
                     </div>
 
@@ -36,10 +37,10 @@
 
                     <div class="d-flex justify-content-between">
                         <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
-                            <i class="fas fa-times me-1"></i>Cancel
+                            <i class="fas fa-arrow-left me-1"></i>Back to List
                         </a>
                         <button type="submit" class="btn btn-primary rounded-pill px-4">
-                            <i class="fas fa-save me-1"></i>Create Client
+                            <i class="fas fa-save me-1"></i>Save Changes
                         </button>
                     </div>
                 </form>

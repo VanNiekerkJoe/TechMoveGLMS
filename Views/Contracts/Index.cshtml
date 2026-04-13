@@ -1,6 +1,15 @@
 ﻿@model IEnumerable<TechMoveGLMS.Models.Contract>
+
 @{
     ViewData["Title"] = "Contracts";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -9,7 +18,7 @@
 </div>
 
 <!-- Search / Filter Bar -->
-<div class="filter-bar bg-white p-3 mb-4">
+<div class="filter-bar bg-white p-3 mb-4 rounded-4 border">
     <form method="get" class="row g-3 align-items-end">
         <div class="col-md-3">
             <label class="form-label small fw-semibold">Start Date</label>
@@ -35,7 +44,15 @@
     <div class="card-body p-0">
         <table class="table table-hover mb-0">
             <thead>
-                <tr><th>Client</th><th>Start</th><th>End</th><th>Status</th><th>Agreement</th><th>Actions</th></tr>
+                <tr>
+                    <th>Client</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Service Level</th>
+                    <th>Agreement</th>
+                    <th>Actions</th>
+                </tr>
             </thead>
             <tbody>
                 @foreach (var contract in Model)
@@ -45,15 +62,26 @@
                         <td>@contract.StartDate.ToShortDateString()</td>
                         <td>@contract.EndDate.ToShortDateString()</td>
                         <td><span class="badge-status">@contract.Status</span></td>
+                        <td>@contract.ServiceLevel</td>
                         <td>
                             @if (!string.IsNullOrEmpty(contract.SignedAgreementPath))
                             {
-                                <a asp-action="Download" asp-route-filePath="@contract.SignedAgreementPath" class="btn btn-sm btn-outline-secondary rounded-pill"><i class="fas fa-download"></i> PDF</a>
+                                <a asp-action="Download" asp-route-filePath="@contract.SignedAgreementPath" class="btn btn-sm btn-outline-secondary rounded-pill">
+                                    <i class="fas fa-download"></i> PDF
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">No file</span>
                             }
                         </td>
                         <td>
-                            <a asp-action="Edit" asp-route-id="@contract.ContractId" class="btn btn-sm btn-outline-secondary rounded-pill me-1">Edit</a>
-                            <a asp-controller="ServiceRequests" asp-action="Create" asp-route-contractId="@contract.ContractId" class="btn btn-sm btn-primary rounded-pill">New Request</a>
+                            <a asp-action="Edit" asp-route-id="@contract.ContractId" class="btn btn-sm btn-outline-secondary rounded-pill me-1">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@contract.ContractId" class="btn btn-sm btn-outline-danger rounded-pill">
+                                <i class="fas fa-trash"></i>
+                            </a>
                         </td>
                     </tr>
                 }
@@ -61,3 +89,11 @@
         </table>
     </div>
 </div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="fas fa-file-contract fa-3x text-secondary mb-3"></i>
+        <p class="text-secondary">No contracts found. Click "New Contract" to add one.</p>
+    </div>
+}

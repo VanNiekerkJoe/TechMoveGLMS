@@ -1,11 +1,24 @@
 ﻿@model IEnumerable<TechMoveGLMS.Models.Client>
+
 @{
     ViewData["Title"] = "Clients";
 }
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-    <h2 class="fw-semibold" style="color: #34495E;"><i class="fas fa-users me-2"></i>Clients</h2>
-    <a asp-action="Create" class="btn btn-primary rounded-pill"><i class="fas fa-plus me-1"></i> New Client</a>
+    <h2 class="fw-semibold" style="color: #34495E;">
+        <i class="fas fa-users me-2"></i>Clients
+    </h2>
+    <a asp-action="Create" class="btn btn-primary rounded-pill">
+        <i class="fas fa-plus me-1"></i> New Client
+    </a>
 </div>
 
 <div class="card">
@@ -14,20 +27,25 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Contact</th>
+                    <th>Contact Details</th>
                     <th>Region</th>
-                    <th style="width:80px">Actions</th>
+                    <th style="width: 120px">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var client in Model)
                 {
                     <tr>
-                        <td>@client.Name</td>
+                        <td class="fw-semibold">@client.Name</td>
                         <td>@client.ContactDetails</td>
                         <td>@client.Region</td>
                         <td>
-                            <a asp-action="Edit" asp-route-id="@client.ClientId" class="btn btn-sm btn-outline-secondary rounded-pill"><i class="fas fa-edit"></i></a>
+                            <a asp-action="Edit" asp-route-id="@client.ClientId" class="btn btn-sm btn-outline-secondary rounded-pill me-1" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@client.ClientId" class="btn btn-sm btn-outline-danger rounded-pill" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
                         </td>
                     </tr>
                 }
@@ -35,3 +53,11 @@
         </table>
     </div>
 </div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="fas fa-users fa-3x text-secondary mb-3"></i>
+        <p class="text-secondary">No clients found. Click "New Client" to add one.</p>
+    </div>
+}

@@ -1,0 +1,88 @@
+﻿@model TechMoveGLMS.Models.Contract
+
+@{
+    ViewData["Title"] = "Edit Contract";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-white fw-bold">
+                <i class="fas fa-file-signature me-2"></i>Edit Contract
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" enctype="multipart/form-data" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                    <input type="hidden" asp-for="ContractId" />
+                    <input type="hidden" asp-for="SignedAgreementPath" />
+
+                    <div class="mb-3">
+                        <label asp-for="ClientId" class="form-label fw-semibold">Client</label>
+                        <select asp-for="ClientId" class="form-select" asp-items="ViewBag.ClientId"></select>
+                        <span asp-validation-for="ClientId" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="StartDate" class="form-label fw-semibold">Start Date</label>
+                            <input asp-for="StartDate" class="form-control" type="date" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="EndDate" class="form-label fw-semibold">End Date</label>
+                            <input asp-for="EndDate" class="form-control" type="date" />
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Status" class="form-label fw-semibold">Contract Status</label>
+                        <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<ContractStatus>()"></select>
+                        <span asp-validation-for="Status" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ServiceLevel" class="form-label fw-semibold">Service Level</label>
+                        <input asp-for="ServiceLevel" class="form-control" />
+                        <span asp-validation-for="ServiceLevel" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Replace Signed Agreement (PDF)</label>
+                        <input type="file" name="signedAgreement" accept=".pdf" class="form-control" />
+                        <small class="text-muted">Leave empty to keep current file. Only PDF files accepted.</small>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.SignedAgreementPath))
+                    {
+                        <div class="mb-3">
+                            <label class="form-label">Current File</label>
+                            <div>
+                                <a asp-action="Download" asp-route-filePath="@Model.SignedAgreementPath" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-download"></i> Download Current PDF
+                                </a>
+                            </div>
+                        </div>
+                    }
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4">
+                            <i class="fas fa-save me-1"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
