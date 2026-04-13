@@ -1,0 +1,47 @@
+﻿@model TechMoveGLMS.Models.Contract
+@{
+    ViewData["Title"] = "New Contract";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-white fw-bold">Contract Details</div>
+            <div class="card-body">
+                <form asp-action="Create" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                    <div class="mb-3">
+                        <label asp-for="ClientId" class="form-label"></label>
+                        <select asp-for="ClientId" asp-items="ViewBag.ClientId" class="form-select"></select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="StartDate"></label>
+                            <input asp-for="StartDate" class="form-control" type="date" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="EndDate"></label>
+                            <input asp-for="EndDate" class="form-control" type="date" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Status"></label>
+                        <select asp-for="Status" asp-items="Html.GetEnumSelectList<ContractStatus>()" class="form-select"></select>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="ServiceLevel"></label>
+                        <input asp-for="ServiceLevel" class="form-control" placeholder="e.g. Premium, Standard" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Signed Agreement (PDF only)</label>
+                        <input type="file" name="signedAgreement" accept=".pdf" class="form-control" />
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">Cancel</a>
+                        <button type="submit" class="btn btn-primary rounded-pill">Create Contract</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

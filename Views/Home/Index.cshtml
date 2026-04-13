@@ -1,0 +1,172 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    var currentDate = DateTime.Now;
+    var greeting = currentDate.Hour < 12 ? "Good Morning" : currentDate.Hour < 18 ? "Good Afternoon" : "Good Evening";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<style>
+    .stat-card {
+        background: linear-gradient(135deg, #34495E 0%, #2C3E50 100%);
+        border-radius: 28px;
+        padding: 1.5rem;
+        color: white;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        opacity: 0.85;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .dashboard-card {
+        background: white;
+        border-radius: 24px;
+        border: none;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .card-header-custom {
+        background: white;
+        border-bottom: 2px solid #D5DBDB;
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+    }
+
+    .quick-action-btn {
+        background: white;
+        border: 1px solid #D5DBDB;
+        border-radius: 50px;
+        padding: 0.6rem 1.2rem;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        color: #34495E;
+        font-weight: 500;
+        display: inline-block;
+    }
+
+        .quick-action-btn:hover {
+            background: #34495E;
+            border-color: #34495E;
+            color: white;
+        }
+
+    .badge-status {
+        padding: 0.35rem 0.85rem;
+        border-radius: 50px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .badge-active {
+        background: #27AE60;
+        color: white;
+    }
+
+    .badge-pending {
+        background: #F39C12;
+        color: white;
+    }
+
+    .badge-expired {
+        background: #E74C3C;
+        color: white;
+    }
+
+    .badge-draft {
+        background: #95A5A6;
+        color: white;
+    }
+
+    .chart-container {
+        height: 300px;
+        position: relative;
+    }
+</style>
+
+<div class="greeting-section mb-4 p-4 bg-white rounded-4 border">
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+            <h1 class="display-6 fw-bold" style="color: #34495E;">@greeting, TechMove Team!</h1>
+            <p class="text-secondary mb-0">@currentDate.ToString("dddd, MMMM dd, yyyy") • System Status: <span class="text-success fw-semibold">Operational</span></p>
+        </div>
+        <div>
+            <a href="/Contracts/Create" class="quick-action-btn me-2"><i class="fas fa-file-signature me-2"></i>New Contract</a>
+            <a href="/ServiceRequests/Create" class="quick-action-btn"><i class="fas fa-headset me-2"></i>New Request</a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3 col-sm-6"><div class="stat-card" onclick="location.href='/Clients'"><div class="stat-icon"><i class="fas fa-users"></i></div><div class="stat-number" id="totalClients">0</div><div class="stat-label">Total Clients</div></div></div>
+    <div class="col-md-3 col-sm-6"><div class="stat-card" onclick="location.href='/Contracts'"><div class="stat-icon"><i class="fas fa-file-contract"></i></div><div class="stat-number" id="totalContracts">0</div><div class="stat-label">Total Contracts</div></div></div>
+    <div class="col-md-3 col-sm-6"><div class="stat-card" onclick="location.href='/ServiceRequests'"><div class="stat-icon"><i class="fas fa-tasks"></i></div><div class="stat-number" id="totalRequests">0</div><div class="stat-label">Service Requests</div></div></div>
+    <div class="col-md-3 col-sm-6"><div class="stat-card" onclick="location.href='/Contracts'"><div class="stat-icon"><i class="fas fa-chart-line"></i></div><div class="stat-number" id="activeContracts">0</div><div class="stat-label">Active Contracts</div></div></div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-8"><div class="dashboard-card"><div class="card-header-custom"><i class="fas fa-chart-line me-2"></i>Contract Activity Overview</div><div class="card-body"><div class="chart-container"><canvas id="contractChart"></canvas></div></div></div></div>
+    <div class="col-lg-4"><div class="dashboard-card"><div class="card-header-custom"><i class="fas fa-chart-pie me-2"></i>Contract Status Distribution</div><div class="card-body"><div class="chart-container" style="height:260px"><canvas id="statusChart"></canvas></div></div></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7"><div class="dashboard-card"><div class="card-header-custom d-flex justify-content-between"><span><i class="fas fa-clock me-2"></i>Recent Service Requests</span><a href="/ServiceRequests" class="btn btn-sm btn-outline-secondary rounded-pill">View All →</a></div><div class="card-body p-0" id="recentRequests"><div class="text-center p-5">Loading...</div></div></div></div>
+    <div class="col-lg-5"><div class="dashboard-card"><div class="card-header-custom"><i class="fas fa-bolt me-2"></i>Quick Actions</div><div class="card-body"><div class="d-grid gap-3"><a href="/Clients/Create" class="quick-action-btn text-center d-flex justify-content-between p-3"><span><i class="fas fa-user-plus me-2"></i>Add New Client</span><i class="fas fa-arrow-right"></i></a><a href="/Contracts/Create" class="quick-action-btn text-center d-flex justify-content-between p-3"><span><i class="fas fa-file-signature me-2"></i>Create Contract</span><i class="fas fa-arrow-right"></i></a><a href="/ServiceRequests/Create" class="quick-action-btn text-center d-flex justify-content-between p-3"><span><i class="fas fa-headset me-2"></i>Submit Service Request</span><i class="fas fa-arrow-right"></i></a></div></div></div></div>
+</div>
+
+<script>
+    let contractChart, statusChart;
+    $(document).ready(function() { loadStats(); loadRecent(); });
+    function loadStats() {
+        $.get('/api/dashboard/stats', function(data) {
+            $('#totalClients').text(data.totalClients);
+            $('#totalContracts').text(data.totalContracts);
+            $('#totalRequests').text(data.totalRequests);
+            $('#activeContracts').text(data.activeContracts);
+            if (contractChart) contractChart.destroy();
+            if (statusChart) statusChart.destroy();
+            contractChart = new Chart(document.getElementById('contractChart'), {
+                type: 'line', data: { labels: data.monthlyContracts.labels, datasets: [{ label: 'Contracts Created', data: data.monthlyContracts.values, borderColor: '#34495E', backgroundColor: 'rgba(52,73,94,0.1)', borderWidth: 3, fill: true, tension: 0.4 }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+            statusChart = new Chart(document.getElementById('statusChart'), {
+                type: 'doughnut', data: { labels: data.statusDistribution.labels, datasets: [{ data: data.statusDistribution.values, backgroundColor: ['#27AE60','#F39C12','#E74C3C','#95A5A6'], borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%' }
+            });
+        }).fail(() => { console.error('Stats API failed'); });
+    }
+    function loadRecent() {
+        $.get('/api/dashboard/recent-requests', function(data) {
+            if (data.length === 0) { $('#recentRequests').html('<div class="text-center p-5">No recent requests</div>'); return; }
+            let html = '<div class="list-group list-group-flush">';
+            data.forEach(r => {
+                let statusClass = r.status === 'Pending' ? 'badge-pending' : (r.status === 'Approved' ? 'badge-active' : 'badge-expired');
+                html += `<div class="list-group-item d-flex justify-content-between align-items-center"><div><div class="fw-semibold">${r.description}</div><small class="text-secondary">Contract: ${r.contractName}</small></div><div class="text-end"><span class="badge-status ${statusClass}">${r.status}</span><div><small class="text-secondary">${new Date(r.date).toLocaleDateString()}</small></div></div></div>`;
+            });
+            html += '</div>';
+            $('#recentRequests').html(html);
+        }).fail(() => { $('#recentRequests').html('<div class="text-center p-5 text-danger">Error loading data</div>'); });
+    }
+</script>

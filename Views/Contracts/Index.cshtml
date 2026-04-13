@@ -1,0 +1,63 @@
+﻿@model IEnumerable<TechMoveGLMS.Models.Contract>
+@{
+    ViewData["Title"] = "Contracts";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-semibold"><i class="fas fa-file-signature me-2"></i>Contracts</h2>
+    <a asp-action="Create" class="btn btn-primary rounded-pill"><i class="fas fa-plus me-1"></i> New Contract</a>
+</div>
+
+<!-- Search / Filter Bar -->
+<div class="filter-bar bg-white p-3 mb-4">
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small fw-semibold">Start Date</label>
+            <input type="date" name="startDate" class="form-control" value="@Context.Request.Query["startDate"]" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small fw-semibold">End Date</label>
+            <input type="date" name="endDate" class="form-control" value="@Context.Request.Query["endDate"]" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small fw-semibold">Status</label>
+            <select name="status" class="form-select" asp-items="Html.GetEnumSelectList<ContractStatus>()">
+                <option value="">All</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary w-100 rounded-pill"><i class="fas fa-search me-1"></i> Filter</button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr><th>Client</th><th>Start</th><th>End</th><th>Status</th><th>Agreement</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var contract in Model)
+                {
+                    <tr>
+                        <td>@contract.Client?.Name</td>
+                        <td>@contract.StartDate.ToShortDateString()</td>
+                        <td>@contract.EndDate.ToShortDateString()</td>
+                        <td><span class="badge-status">@contract.Status</span></td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(contract.SignedAgreementPath))
+                            {
+                                <a asp-action="Download" asp-route-filePath="@contract.SignedAgreementPath" class="btn btn-sm btn-outline-secondary rounded-pill"><i class="fas fa-download"></i> PDF</a>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@contract.ContractId" class="btn btn-sm btn-outline-secondary rounded-pill me-1">Edit</a>
+                            <a asp-controller="ServiceRequests" asp-action="Create" asp-route-contractId="@contract.ContractId" class="btn btn-sm btn-primary rounded-pill">New Request</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
