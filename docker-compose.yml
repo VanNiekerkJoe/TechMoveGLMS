@@ -1,0 +1,6 @@
+services:
+  techmoveglms:
+    image: ${DOCKER_REGISTRY-}techmoveglms
+    build:
+      context: .
+      dockerfile: TechMoveGLMS/Dockerfile

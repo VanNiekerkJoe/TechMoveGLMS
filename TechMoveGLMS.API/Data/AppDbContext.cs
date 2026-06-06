@@ -1,9 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Reflection.Emit;
-using TechMoveGLMS.Models;
+using TechMoveGLMS.API.Models;
 
-namespace TechMoveGLMS.Data
+namespace TechMoveGLMS.API.Data
 {
     public class AppDbContext : DbContext
     {
