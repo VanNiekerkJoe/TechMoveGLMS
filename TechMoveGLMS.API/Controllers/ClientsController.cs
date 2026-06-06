@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TechMoveGLMS.MVC.Services;
 
-namespace TechMoveGLMS.MVC.Controllers
+namespace TechMoveGLMS.Controllers
 {
     public class ClientsController : Controller
     {
@@ -44,7 +44,6 @@ namespace TechMoveGLMS.MVC.Controllers
         public async Task<IActionResult> Edit(int id, Client client)
         {
             if (id != client.ClientId) return NotFound();
-
             if (ModelState.IsValid)
             {
                 var result = await _apiService.PutAsync<Client>($"api/clients/{id}", client);

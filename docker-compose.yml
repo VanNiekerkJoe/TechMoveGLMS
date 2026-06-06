@@ -1,6 +1,53 @@
 services:
-  techmoveglms:
-    image: ${DOCKER_REGISTRY-}techmoveglms
+  sql-server-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql-server-db
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "YourStrong!Password"
+      MSSQL_PID: "Express"
+    ports:
+      - "1433:1433"
+    networks:
+      - glms-network
+    volumes:
+      - sql-data:/var/opt/mssql
+
+  glms-backend-api:
+    build:
+      context: .
+      dockerfile: TechMoveGLMS.API/Dockerfile
+    container_name: glms-backend-api
+    ports:
+      - "5001:80"
+    depends_on:
+      - sql-server-db
+    networks:
+      - glms-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sql-server-db;Database=TechMoveGLMS;User Id=sa;Password=YourStrong!Password;TrustServerCertificate=true;Encrypt=false;
+    restart: unless-stopped
+
+  glms-frontend-web:
     build:
       context: .
       dockerfile: TechMoveGLMS/Dockerfile
+    container_name: glms-frontend-web
+    ports:
+      - "5000:80"
+    depends_on:
+      - glms-backend-api
+    networks:
+      - glms-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ApiSettings__BaseUrl=http://glms-backend-api
+    restart: unless-stopped
+
+networks:
+  glms-network:
+    driver: bridge
+
+volumes:
+  sql-data:

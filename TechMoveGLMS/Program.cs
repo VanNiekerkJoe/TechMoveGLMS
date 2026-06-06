@@ -29,6 +29,26 @@ builder.Services.AddHttpClient<ICurrencyService, CurrencyService>(client =>
     client.Timeout = TimeSpan.FromSeconds(15);
 });
 
+// ===== API SERVICE FOR MVC TO CALL BACKEND API =====
+builder.Services.AddHttpClient<IApiService, ApiService>(client =>
+{
+    var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://glms-backend-api";
+    client.BaseAddress = new Uri(apiBaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+// ====================================================
+
+// ===== SESSION SUPPORT =====
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+// ===========================
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -41,6 +61,11 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+// ===== ADD SESSION MIDDLEWARE =====
+app.UseSession();
+// ================================
+
 app.UseAuthorization();
 
 app.MapControllerRoute(
