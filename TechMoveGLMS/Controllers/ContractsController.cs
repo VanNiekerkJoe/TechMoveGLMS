@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TechMoveGLMS.Data;
@@ -7,6 +8,7 @@ using TechMoveGLMS.Services;
 
 namespace TechMoveGLMS.Controllers
 {
+    [Authorize]
     public class ContractsController : Controller
     {
         private readonly AppDbContext _context;

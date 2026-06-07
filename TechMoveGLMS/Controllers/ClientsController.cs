@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TechMoveGLMS.Data;
 using TechMoveGLMS.Models;
 
 namespace TechMoveGLMS.Controllers
 {
+    [Authorize]
     public class ClientsController : Controller
     {
         private readonly AppDbContext _context;

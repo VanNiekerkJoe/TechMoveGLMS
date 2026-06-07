@@ -1,0 +1,656 @@
+﻿@model TechMoveGLMS.Controllers.LoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In — TechMove GLMS</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+    <!-- Font Awesome (required for icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        /* ── TOKENS ── */
+        :root {
+            --ink: #0A0E1A;
+            --surface: #0D1220;
+            --panel: #161D2E;
+            --border: rgba(255,255,255,0.07);
+            --border-hi: rgba(99,210,190,0.40);
+            --teal: #63D2BE;
+            --teal-light: #85E5D2;
+            --green: #5ADB8E;
+            --text: #F0F4FF;
+            --muted: #6B7894;
+            --subtle: #3A4460;
+            --font-d: 'Syne', sans-serif;
+            --font-m: 'DM Mono', monospace;
+            --font-b: 'Inter', sans-serif;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            background: var(--ink);
+            font-family: var(--font-b);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── LAYOUT ── */
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* ── LEFT PANEL ── */
+        .lp-left {
+            width: 50%;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .lp-left::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background-image: radial-gradient(circle, rgba(99,210,190,0.06) 1px, transparent 1px);
+                background-size: 28px 28px;
+                pointer-events: none;
+            }
+
+            .lp-left::after {
+                content: '';
+                position: absolute;
+                bottom: -80px;
+                left: -80px;
+                width: 320px;
+                height: 320px;
+                background: radial-gradient(circle, rgba(99,210,190,0.06) 0%, transparent 70%);
+                pointer-events: none;
+            }
+
+        .lp-brand {
+            position: relative;
+            z-index: 1;
+        }
+
+        .lp-logo-mark {
+            width: 44px;
+            height: 44px;
+            background: var(--teal);
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-d);
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--ink);
+            margin-bottom: 1rem;
+        }
+
+        .lp-brand-name {
+            font-family: var(--font-d);
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: -0.04em;
+            color: var(--text);
+        }
+
+        .lp-brand-tagline {
+            font-family: var(--font-m);
+            font-size: 0.62rem;
+            color: var(--teal);
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .lp-body {
+            position: relative;
+            z-index: 1;
+        }
+
+        .lp-headline {
+            font-family: var(--font-d);
+            font-size: 2.1rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            line-height: 1.1;
+            color: var(--text);
+            margin-bottom: 1rem;
+        }
+
+            .lp-headline span {
+                color: var(--teal);
+            }
+
+        .lp-desc {
+            font-size: 0.82rem;
+            color: var(--muted);
+            line-height: 1.75;
+            max-width: 270px;
+        }
+
+        .lp-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 2rem;
+        }
+
+        .lp-stat {
+            background: rgba(99,210,190,0.07);
+            border: 1px solid rgba(99,210,190,0.15);
+            border-radius: 9px;
+            padding: 7px 13px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .lp-stat-val {
+            font-family: var(--font-m);
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--teal);
+        }
+
+        .lp-stat-lbl {
+            font-size: 0.68rem;
+            color: var(--muted);
+        }
+
+        .lp-footer {
+            position: relative;
+            z-index: 1;
+            font-family: var(--font-m);
+            font-size: 0.6rem;
+            color: var(--subtle);
+            letter-spacing: 0.06em;
+        }
+
+        /* ── RIGHT PANEL ── */
+        .lp-right {
+            width: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+
+        .lp-form-wrap {
+            width: 100%;
+            max-width: 380px;
+        }
+
+        .lp-form-title {
+            font-family: var(--font-d);
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .lp-form-sub {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 2rem;
+        }
+
+        /* ── ALERTS ── */
+        .lp-alert-success {
+            background: rgba(90,219,142,0.10);
+            border: 1px solid rgba(90,219,142,0.2);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.78rem;
+            color: var(--green);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lp-alert-error {
+            background: rgba(240,90,90,0.08);
+            border: 1px solid rgba(240,90,90,0.2);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.78rem;
+            color: #F05A5A;
+            margin-bottom: 1.5rem;
+        }
+
+        /* ── FIELDS ── */
+        .lp-field {
+            margin-bottom: 1.2rem;
+        }
+
+        .lp-label {
+            display: block;
+            font-family: var(--font-m);
+            font-size: 0.62rem;
+            color: var(--muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 7px;
+        }
+
+        .lp-input-wrap {
+            display: flex;
+            align-items: center;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+            .lp-input-wrap:focus-within {
+                border-color: var(--border-hi);
+            }
+
+        .lp-input-icon {
+            width: 44px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--subtle);
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .lp-input-wrap:focus-within .lp-input-icon {
+            color: var(--teal);
+        }
+
+        .lp-input-wrap input[type="text"],
+        .lp-input-wrap input[type="password"] {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-family: var(--font-b);
+            font-size: 0.85rem;
+            padding: 0.72rem 0.75rem 0.72rem 0;
+        }
+
+        .lp-input-wrap input::placeholder {
+            color: var(--subtle);
+        }
+
+        .lp-eye-btn {
+            width: 40px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--subtle);
+            cursor: pointer;
+            background: none;
+            border: none;
+            transition: color 0.2s;
+            padding: 0;
+        }
+
+            .lp-eye-btn:hover {
+                color: var(--teal);
+            }
+
+        /* ── ROW OPTS ── */
+        .lp-row-opts {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.75rem;
+        }
+
+        .lp-remember {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.75rem;
+            color: var(--muted);
+            cursor: pointer;
+        }
+
+        .lp-checkbox {
+            width: 16px;
+            height: 16px;
+            border: 1px solid var(--subtle);
+            border-radius: 4px;
+            cursor: pointer;
+            accent-color: var(--teal);
+        }
+
+        .lp-forgot {
+            font-family: var(--font-m);
+            font-size: 0.7rem;
+            color: var(--muted);
+            text-decoration: none;
+            letter-spacing: 0.04em;
+            transition: color 0.2s;
+        }
+
+            .lp-forgot:hover {
+                color: var(--teal);
+            }
+
+        /* ── SUBMIT ── */
+        .lp-btn-submit {
+            width: 100%;
+            padding: 0.82rem;
+            background: var(--teal);
+            border: none;
+            border-radius: 10px;
+            font-family: var(--font-d);
+            font-size: 0.92rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--ink);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+            .lp-btn-submit:hover {
+                background: var(--teal-light);
+                transform: translateY(-1px);
+            }
+
+            .lp-btn-submit:active {
+                transform: translateY(0);
+            }
+
+        /* ── DEMO BOX ── */
+        .lp-demo {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.9rem 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .lp-demo-title {
+            font-family: var(--font-m);
+            font-size: 0.58rem;
+            color: var(--subtle);
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .lp-demo-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-m);
+            font-size: 0.7rem;
+            padding: 2px 0;
+        }
+
+        .lp-demo-user {
+            color: var(--teal);
+            min-width: 70px;
+        }
+
+        .lp-demo-sep {
+            color: var(--subtle);
+        }
+
+        .lp-demo-pass {
+            color: var(--muted);
+        }
+
+        /* ── DIVIDER ── */
+        .lp-divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .lp-divider-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .lp-divider-text {
+            font-family: var(--font-m);
+            font-size: 0.6rem;
+            color: var(--subtle);
+            letter-spacing: 0.1em;
+            white-space: nowrap;
+        }
+
+        .lp-register {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+            .lp-register a {
+                color: var(--teal);
+                text-decoration: none;
+                font-weight: 500;
+            }
+
+                .lp-register a:hover {
+                    color: var(--teal-light);
+                }
+
+        /* ── VALIDATION OVERRIDES ── */
+        .text-danger {
+            color: #F05A5A !important;
+            font-size: 0.7rem;
+            margin-top: 4px;
+            display: block;
+        }
+
+        /* ── RESPONSIVE ── */
+        @@media (max-width: 768px) {
+            .lp-left {
+                display: none;
+            }
+
+            .lp-right {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-page">
+
+        <!-- LEFT PANEL -->
+        <div class="lp-left">
+            <div class="lp-brand">
+                <div class="lp-logo-mark">TM</div>
+                <div class="lp-brand-name">TechMove GLMS</div>
+                <div class="lp-brand-tagline">Global Logistics Management</div>
+            </div>
+
+            <div class="lp-body">
+                <h1 class="lp-headline">Move cargo.<br><span>Move smarter.</span></h1>
+                <p class="lp-desc">One unified platform to manage contracts, clients, and service requests across your entire logistics operation.</p>
+                <div class="lp-stats">
+                    <div class="lp-stat">
+                        <span class="lp-stat-val">24</span>
+                        <span class="lp-stat-lbl">Active Contracts</span>
+                    </div>
+                    <div class="lp-stat">
+                        <span class="lp-stat-val">38</span>
+                        <span class="lp-stat-lbl">Clients</span>
+                    </div>
+                    <div class="lp-stat">
+                        <span class="lp-stat-val" style="color: #5ADB8E;">Operational</span>
+                        <span class="lp-stat-lbl">System Status</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lp-footer">© @DateTime.Now.Year TechMove GLMS · All rights reserved</div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="lp-right">
+            <div class="lp-form-wrap">
+                <h2 class="lp-form-title">Welcome back</h2>
+                <p class="lp-form-sub">Sign in to your operations dashboard</p>
+
+                @if (TempData["Success"] != null)
+                {
+                    <div class="lp-alert-success">
+                        <i class="fas fa-check-circle"></i>
+                        @TempData["Success"]
+                    </div>
+                }
+
+                @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Values.SelectMany(v => v.Errors).Any())
+                {
+                    <div class="lp-alert-error">
+                        @foreach (var modelState in ViewData.ModelState.Values)
+                        {
+                            foreach (var error in modelState.Errors)
+                            {
+                                <div>@error.ErrorMessage</div>
+                            }
+                        }
+                    </div>
+                }
+
+                <form asp-action="Login" method="post">
+                    <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+                    <!-- Username -->
+                    <div class="lp-field">
+                        <label asp-for="Username" class="lp-label">Username</label>
+                        <div class="lp-input-wrap">
+                            <div class="lp-input-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <input asp-for="Username" type="text" placeholder="Enter your username" autofocus />
+                        </div>
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="lp-field">
+                        <label asp-for="Password" class="lp-label">Password</label>
+                        <div class="lp-input-wrap" id="pwWrap">
+                            <div class="lp-input-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <input asp-for="Password" type="password" id="pwInput" placeholder="Enter your password" />
+                            <button type="button" class="lp-eye-btn" id="eyeBtn" title="Show/Hide password">
+                                <i class="fas fa-eye" id="eyeIcon"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <!-- Options row -->
+                    <div class="lp-row-opts">
+                        <label class="lp-remember">
+                            <input asp-for="RememberMe" type="checkbox" class="lp-checkbox" />
+                            Remember me
+                        </label>
+                        <a href="#" class="lp-forgot">Forgot password?</a>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" class="lp-btn-submit">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Sign in
+                    </button>
+
+                    <!-- Demo credentials -->
+                    <div class="lp-demo">
+                        <div class="lp-demo-title">Demo credentials</div>
+                        <div class="lp-demo-row">
+                            <span class="lp-demo-user">admin</span>
+                            <span class="lp-demo-sep">/</span>
+                            <span class="lp-demo-pass">admin123</span>
+                        </div>
+                        <div class="lp-demo-row">
+                            <span class="lp-demo-user">manager</span>
+                            <span class="lp-demo-sep">/</span>
+                            <span class="lp-demo-pass">manager123</span>
+                        </div>
+                        <div class="lp-demo-row">
+                            <span class="lp-demo-user">user</span>
+                            <span class="lp-demo-sep">/</span>
+                            <span class="lp-demo-pass">user123</span>
+                        </div>
+                    </div>
+
+                    <div class="lp-divider">
+                        <div class="lp-divider-line"></div>
+                        <span class="lp-divider-text">New to TechMove?</span>
+                        <div class="lp-divider-line"></div>
+                    </div>
+
+                    <div class="lp-register">
+                        <a asp-action="Register">Create an account →</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            var eyeBtn = document.getElementById('eyeBtn');
+            var pwInput = document.getElementById('pwInput');
+            var eyeIcon = document.getElementById('eyeIcon');
+            var isPasswordVisible = false;
+
+            if (eyeBtn && pwInput) {
+                eyeBtn.addEventListener('click', function() {
+                    isPasswordVisible = !isPasswordVisible;
+                    pwInput.type = isPasswordVisible ? 'text' : 'password';
+
+                    if (eyeIcon) {
+                        eyeIcon.className = isPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye';
+                    }
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

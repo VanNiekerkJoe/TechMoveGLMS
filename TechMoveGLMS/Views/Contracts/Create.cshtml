@@ -4,100 +4,97 @@
     ViewData["Title"] = "New Contract";
 }
 
-<!-- Display success or error messages -->
 @if (TempData["Success"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <div class="alert alert-success alert-dismissible fade show">
         <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
-
 @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Values.SelectMany(v => v.Errors).Any())
 {
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <div class="alert alert-danger alert-dismissible fade show">
         <strong>Please correct the following errors:</strong>
-        <ul>
-            @foreach (var modelState in ViewData.ModelState.Values)
-            {
-                foreach (var error in modelState.Errors)
+        <ul class="mb-0 mt-2">
+            @foreach (var ms in ViewData.ModelState.Values)
+                foreach (var err in ms.Errors)
                 {
-                    <li>@error.ErrorMessage</li>
+                    <li>@err.ErrorMessage</li>
                 }
-            }
         </ul>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header bg-white fw-bold">
-                <i class="fas fa-file-signature me-2"></i>Create New Contract
-            </div>
-            <div class="card-body">
-                <form asp-action="Create" enctype="multipart/form-data" method="post">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div style="max-width: 680px; margin: 0 auto;">
+    <div style="margin-bottom: 1.5rem;">
+        <span class="tm-section-label">Contracts / New</span>
+        <h1 style="font-family: var(--font-display); font-size: 1.75rem; font-weight: 800; letter-spacing: -0.04em; margin: 0;">
+            Create Contract
+        </h1>
+    </div>
 
-                    <!-- Client Dropdown -->
-                    <div class="mb-3">
-                        <label asp-for="ClientId" class="form-label fw-semibold">Client</label>
-                        <select asp-for="ClientId" class="form-select" asp-items="ViewBag.ClientId">
-                            <option value="">-- Select Client --</option>
-                        </select>
-                        <span asp-validation-for="ClientId" class="text-danger"></span>
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-file-signature me-2" style="color: var(--tm-teal);"></i>Contract Details
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" enctype="multipart/form-data" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="mb-4">
+                    <label asp-for="ClientId" class="form-label">Client</label>
+                    <select asp-for="ClientId" class="form-select" asp-items="ViewBag.ClientId">
+                        <option value="">— Select a client —</option>
+                    </select>
+                    <span asp-validation-for="ClientId" class="text-danger"></span>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="StartDate" class="form-label">Start Date</label>
+                        <input asp-for="StartDate" class="form-control" type="date" />
+                        <span asp-validation-for="StartDate" class="text-danger"></span>
                     </div>
-
-                    <!-- Date Range -->
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="StartDate" class="form-label fw-semibold">Start Date</label>
-                            <input asp-for="StartDate" class="form-control" type="date" />
-                            <span asp-validation-for="StartDate" class="text-danger"></span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="EndDate" class="form-label fw-semibold">End Date</label>
-                            <input asp-for="EndDate" class="form-control" type="date" />
-                            <span asp-validation-for="EndDate" class="text-danger"></span>
-                        </div>
+                    <div class="col-md-6">
+                        <label asp-for="EndDate" class="form-label">End Date</label>
+                        <input asp-for="EndDate" class="form-control" type="date" />
+                        <span asp-validation-for="EndDate" class="text-danger"></span>
                     </div>
+                </div>
 
-                    <!-- Status Dropdown -->
-                    <div class="mb-3">
-                        <label asp-for="Status" class="form-label fw-semibold">Contract Status</label>
-                        <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<ContractStatus>()"></select>
-                        <span asp-validation-for="Status" class="text-danger"></span>
+                <div class="mb-4">
+                    <label asp-for="Status" class="form-label">Contract Status</label>
+                    <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<ContractStatus>()"></select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="ServiceLevel" class="form-label">Service Level</label>
+                    <input asp-for="ServiceLevel" class="form-control" placeholder="e.g. Premium, Standard, Basic" />
+                    <span asp-validation-for="ServiceLevel" class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Signed Agreement (PDF)</label>
+                    <input type="file" name="signedAgreement" id="signedAgreement" accept=".pdf" class="form-control" />
+                    <div style="margin-top: 6px; font-family: var(--font-mono); font-size: 0.65rem; color: var(--tm-muted);">
+                        PDF only · max 10 MB
                     </div>
+                    <span id="fileError" class="text-danger"></span>
+                </div>
 
-                    <!-- Service Level -->
-                    <div class="mb-3">
-                        <label asp-for="ServiceLevel" class="form-label fw-semibold">Service Level</label>
-                        <input asp-for="ServiceLevel" class="form-control" placeholder="e.g., Premium, Standard, Basic" />
-                        <span asp-validation-for="ServiceLevel" class="text-danger"></span>
-                    </div>
+                <hr style="border-color: var(--tm-border); margin: 1.5rem 0;" />
 
-                    <!-- PDF File Upload -->
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Signed Agreement (PDF)</label>
-                        <input type="file" name="signedAgreement" id="signedAgreement" accept=".pdf" class="form-control" />
-                        <small class="text-muted">Only PDF files are accepted. Maximum size: 10MB</small>
-                        <span id="fileError" class="text-danger"></span>
-                    </div>
-
-                    <hr />
-
-                    <!-- Buttons -->
-                    <div class="d-flex justify-content-between">
-                        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
-                            <i class="fas fa-times me-1"></i>Cancel
-                        </a>
-                        <button type="submit" class="btn btn-primary rounded-pill px-4">
-                            <i class="fas fa-save me-1"></i>Create Contract
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="tm-btn-ghost">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="tm-btn-primary">
+                        <i class="fas fa-save"></i> Create Contract
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -106,28 +103,16 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-
     <script>
-        // Client-side file validation
-        document.getElementById('signedAgreement').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const fileError = document.getElementById('fileError');
-
-            if (file) {
-                const fileName = file.name;
-                const fileExtension = fileName.split('.').pop().toLowerCase();
-                const fileSize = file.size / 1024 / 1024; // in MB
-
-                if (fileExtension !== 'pdf') {
-                    fileError.textContent = 'Only PDF files are allowed!';
-                    e.target.value = '';
-                } else if (fileSize > 10) {
-                    fileError.textContent = 'File size cannot exceed 10MB!';
-                    e.target.value = '';
-                } else {
-                    fileError.textContent = '';
-                }
-            }
+        document.getElementById('signedAgreement').addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            var err = document.getElementById('fileError');
+            if (!file) return;
+            var ext = file.name.split('.').pop().toLowerCase();
+            var size = file.size / 1024 / 1024;
+            if (ext !== 'pdf') { err.textContent = 'Only PDF files are allowed.'; e.target.value = ''; }
+            else if (size > 10) { err.textContent = 'File must be under 10 MB.'; e.target.value = ''; }
+            else err.textContent = '';
         });
     </script>
 }

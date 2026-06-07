@@ -1,4 +1,5 @@
 using System.Globalization;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using TechMoveGLMS.Data;
 using TechMoveGLMS.Services;
@@ -32,7 +33,7 @@ builder.Services.AddHttpClient<ICurrencyService, CurrencyService>(client =>
 // ===== API SERVICE FOR MVC TO CALL BACKEND API =====
 builder.Services.AddHttpClient<IApiService, ApiService>(client =>
 {
-    var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://glms-backend-api";
+    var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5001";
     client.BaseAddress = new Uri(apiBaseUrl);
     client.Timeout = TimeSpan.FromSeconds(30);
 });
@@ -49,6 +50,20 @@ builder.Services.AddSession(options =>
 });
 // ===========================
 
+// ===== COOKIE AUTHENTICATION - THIS IS REQUIRED! =====
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Auth/Login";
+        options.LogoutPath = "/Auth/Logout";
+        options.AccessDeniedPath = "/Auth/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.SlidingExpiration = true;
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+    });
+// =====================================================
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -62,11 +77,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// ===== ADD SESSION MIDDLEWARE =====
-app.UseSession();
-// ================================
-
-app.UseAuthorization();
+// ===== MIDDLEWARE ORDER - ORDER MATTERS! =====
+app.UseSession();           // Session first
+app.UseAuthentication();    // Authentication second (MUST be before Authorization)
+app.UseAuthorization();     // Authorization third
+// ============================================
 
 app.MapControllerRoute(
     name: "default",

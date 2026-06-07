@@ -2,171 +2,313 @@
     ViewData["Title"] = "Dashboard";
     var currentDate = DateTime.Now;
     var greeting = currentDate.Hour < 12 ? "Good Morning" : currentDate.Hour < 18 ? "Good Afternoon" : "Good Evening";
+    var greetingEmoji = currentDate.Hour < 12 ? "☀" : currentDate.Hour < 18 ? "⚡" : "🌙";
 }
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<style>
-    .stat-card {
-        background: linear-gradient(135deg, #34495E 0%, #2C3E50 100%);
-        border-radius: 28px;
-        padding: 1.5rem;
-        color: white;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        cursor: pointer;
-    }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-        }
-
-    .stat-icon {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-    }
-
-    .stat-number {
-        font-size: 2.5rem;
-        font-weight: 700;
-    }
-
-    .stat-label {
-        font-size: 0.85rem;
-        opacity: 0.85;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    .dashboard-card {
-        background: white;
-        border-radius: 24px;
-        border: none;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        overflow: hidden;
-    }
-
-    .card-header-custom {
-        background: white;
-        border-bottom: 2px solid #D5DBDB;
-        padding: 1.25rem 1.5rem;
-        font-weight: 600;
-    }
-
-    .quick-action-btn {
-        background: white;
-        border: 1px solid #D5DBDB;
-        border-radius: 50px;
-        padding: 0.6rem 1.2rem;
-        transition: all 0.2s ease;
-        text-decoration: none;
-        color: #34495E;
-        font-weight: 500;
-        display: inline-block;
-    }
-
-        .quick-action-btn:hover {
-            background: #34495E;
-            border-color: #34495E;
-            color: white;
-        }
-
-    .badge-status {
-        padding: 0.35rem 0.85rem;
-        border-radius: 50px;
-        font-size: 0.7rem;
-        font-weight: 600;
-    }
-
-    .badge-active {
-        background: #27AE60;
-        color: white;
-    }
-
-    .badge-pending {
-        background: #F39C12;
-        color: white;
-    }
-
-    .badge-expired {
-        background: #E74C3C;
-        color: white;
-    }
-
-    .badge-draft {
-        background: #95A5A6;
-        color: white;
-    }
-
-    .chart-container {
-        height: 300px;
-        position: relative;
-    }
-</style>
-
-<div class="greeting-section mb-4 p-4 bg-white rounded-4 border">
-    <div class="d-flex justify-content-between align-items-center flex-wrap">
-        <div>
-            <h1 class="display-6 fw-bold" style="color: #34495E;">@greeting, TechMove Team!</h1>
-            <p class="text-secondary mb-0">@currentDate.ToString("dddd, MMMM dd, yyyy") • System Status: <span class="text-success fw-semibold">Operational</span></p>
+<!-- ─── GREETING ─── -->
+<div class="tm-greeting">
+    <div>
+        <div class="tm-greeting-label">TechMove Operations Center</div>
+        <div class="tm-greeting-title">@greeting, TechMove Team @greetingEmoji</div>
+        <div class="tm-greeting-sub">
+            @currentDate.ToString("dddd, MMMM dd, yyyy")
+            &nbsp;·&nbsp;
+            <span class="tm-pulse"></span>
+            <span style="color: var(--tm-green);">All systems operational</span>
         </div>
-        <div>
-            <a href="/Contracts/Create" class="quick-action-btn me-2"><i class="fas fa-file-signature me-2"></i>New Contract</a>
-            <a href="/ServiceRequests/Create" class="quick-action-btn"><i class="fas fa-headset me-2"></i>New Request</a>
+    </div>
+    <div class="tm-greeting-actions">
+        <a href="/Contracts/Create" class="tm-btn-ghost">
+            <i class="fas fa-file-signature"></i> New Contract
+        </a>
+        <a href="/ServiceRequests/Create" class="tm-btn-primary">
+            <i class="fas fa-plus"></i> New Request
+        </a>
+    </div>
+</div>
+
+<!-- ─── STAT CARDS ─── -->
+<div class="tm-stat-grid">
+    <div class="tm-stat-card" onclick="location.href='/Clients'">
+        <div class="tm-stat-trend tm-trend-up" id="clientTrend">—</div>
+        <div class="tm-stat-icon tm-si-teal"><i class="fas fa-users"></i></div>
+        <div class="tm-stat-num" id="totalClients">–</div>
+        <div class="tm-stat-lbl">Total Clients</div>
+    </div>
+    <div class="tm-stat-card" onclick="location.href='/Contracts'">
+        <div class="tm-stat-trend tm-trend-up">+12%</div>
+        <div class="tm-stat-icon tm-si-amber"><i class="fas fa-file-contract"></i></div>
+        <div class="tm-stat-num" id="totalContracts">–</div>
+        <div class="tm-stat-lbl">Total Contracts</div>
+    </div>
+    <div class="tm-stat-card" onclick="location.href='/ServiceRequests'">
+        <div class="tm-stat-trend tm-trend-down">-3%</div>
+        <div class="tm-stat-icon tm-si-red"><i class="fas fa-headset"></i></div>
+        <div class="tm-stat-num" id="totalRequests">–</div>
+        <div class="tm-stat-lbl">Service Requests</div>
+    </div>
+    <div class="tm-stat-card" onclick="location.href='/Contracts'">
+        <div class="tm-stat-trend tm-trend-up">+5%</div>
+        <div class="tm-stat-icon tm-si-green"><i class="fas fa-chart-line"></i></div>
+        <div class="tm-stat-num" id="activeContracts">–</div>
+        <div class="tm-stat-lbl">Active Contracts</div>
+    </div>
+</div>
+
+<!-- ─── CHARTS ROW ─── -->
+<div class="tm-charts-row">
+    <div class="tm-panel">
+        <div class="tm-panel-hd">
+            <span class="tm-panel-title"><i class="fas fa-chart-line me-2" style="color:var(--tm-teal)"></i>Contract Activity</span>
+            <span class="tm-panel-tag">MONTHLY OVERVIEW</span>
+        </div>
+        <div class="tm-panel-body">
+            <div class="tm-chart-wrap">
+                <canvas id="contractChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="tm-panel">
+        <div class="tm-panel-hd">
+            <span class="tm-panel-title"><i class="fas fa-chart-pie me-2" style="color:var(--tm-amber)"></i>Status Split</span>
+            <span class="tm-panel-tag">LIVE</span>
+        </div>
+        <div class="tm-panel-body" style="padding: 1rem 1.5rem;">
+            <canvas id="statusChart" style="max-height: 200px;"></canvas>
+            <div id="statusLegend" style="margin-top: 0.75rem;"></div>
         </div>
     </div>
 </div>
 
-<div class="row g-4 mb-4">
-    <div class="col-md-3 col-sm-6"><div class="stat-card" onclick="location.href='/Clients'"><div class="stat-icon"><i class="fas fa-users"></i></div><div class="stat-number" id="totalClients">0</div><div class="stat-label">Total Clients</div></div></div>
-    <div class="col-md-3 col-sm-6"><div class="stat-card" onclick="location.href='/Contracts'"><div class="stat-icon"><i class="fas fa-file-contract"></i></div><div class="stat-number" id="totalContracts">0</div><div class="stat-label">Total Contracts</div></div></div>
-    <div class="col-md-3 col-sm-6"><div class="stat-card" onclick="location.href='/ServiceRequests'"><div class="stat-icon"><i class="fas fa-tasks"></i></div><div class="stat-number" id="totalRequests">0</div><div class="stat-label">Service Requests</div></div></div>
-    <div class="col-md-3 col-sm-6"><div class="stat-card" onclick="location.href='/Contracts'"><div class="stat-icon"><i class="fas fa-chart-line"></i></div><div class="stat-number" id="activeContracts">0</div><div class="stat-label">Active Contracts</div></div></div>
+<!-- ─── BOTTOM ROW ─── -->
+<div class="tm-bottom-row">
+    <div class="tm-panel">
+        <div class="tm-panel-hd">
+            <span class="tm-panel-title"><i class="fas fa-clock me-2" style="color:var(--tm-teal)"></i>Recent Requests</span>
+            <a href="/ServiceRequests" class="tm-panel-link">View all →</a>
+        </div>
+        <ul class="tm-req-list" id="recentRequests">
+            <li style="padding: 2rem; text-align: center; color: var(--tm-muted); font-family: var(--font-mono); font-size: 0.75rem;">
+                Loading...
+            </li>
+        </ul>
+    </div>
+
+    <div class="tm-panel">
+        <div class="tm-panel-hd">
+            <span class="tm-panel-title"><i class="fas fa-bolt me-2" style="color:var(--tm-amber)"></i>Quick Actions</span>
+        </div>
+        <div class="tm-qa-list">
+            <a href="/Clients/Create" class="tm-qa-btn">
+                <div class="tm-qa-icon"><i class="fas fa-user-plus"></i></div>
+                <div>
+                    <div class="tm-qa-title">Add New Client</div>
+                    <div class="tm-qa-sub">Register a client profile</div>
+                </div>
+                <span class="tm-qa-arrow">→</span>
+            </a>
+            <a href="/Contracts/Create" class="tm-qa-btn">
+                <div class="tm-qa-icon"><i class="fas fa-file-signature"></i></div>
+                <div>
+                    <div class="tm-qa-title">Create Contract</div>
+                    <div class="tm-qa-sub">Attach PDF & set terms</div>
+                </div>
+                <span class="tm-qa-arrow">→</span>
+            </a>
+            <a href="/ServiceRequests/Create" class="tm-qa-btn">
+                <div class="tm-qa-icon"><i class="fas fa-headset"></i></div>
+                <div>
+                    <div class="tm-qa-title">Submit Service Request</div>
+                    <div class="tm-qa-sub">Log a new support ticket</div>
+                </div>
+                <span class="tm-qa-arrow">→</span>
+            </a>
+            <a href="#" class="tm-qa-btn" style="border-color: rgba(99,210,190,0.2); background: rgba(99,210,190,0.03);">
+                <div class="tm-qa-icon" style="background: rgba(99,210,190,0.15);"><i class="fas fa-download"></i></div>
+                <div>
+                    <div class="tm-qa-title">Export Analytics</div>
+                    <div class="tm-qa-sub">Download full report PDF</div>
+                </div>
+                <span class="tm-qa-arrow" style="color: var(--tm-teal);">→</span>
+            </a>
+        </div>
+    </div>
 </div>
 
-<div class="row g-4 mb-4">
-    <div class="col-lg-8"><div class="dashboard-card"><div class="card-header-custom"><i class="fas fa-chart-line me-2"></i>Contract Activity Overview</div><div class="card-body"><div class="chart-container"><canvas id="contractChart"></canvas></div></div></div></div>
-    <div class="col-lg-4"><div class="dashboard-card"><div class="card-header-custom"><i class="fas fa-chart-pie me-2"></i>Contract Status Distribution</div><div class="card-body"><div class="chart-container" style="height:260px"><canvas id="statusChart"></canvas></div></div></div></div>
-</div>
+@section Scripts {
+    <script>
+        let contractChart, statusChart;
 
-<div class="row g-4">
-    <div class="col-lg-7"><div class="dashboard-card"><div class="card-header-custom d-flex justify-content-between"><span><i class="fas fa-clock me-2"></i>Recent Service Requests</span><a href="/ServiceRequests" class="btn btn-sm btn-outline-secondary rounded-pill">View All →</a></div><div class="card-body p-0" id="recentRequests"><div class="text-center p-5">Loading...</div></div></div></div>
-    <div class="col-lg-5"><div class="dashboard-card"><div class="card-header-custom"><i class="fas fa-bolt me-2"></i>Quick Actions</div><div class="card-body"><div class="d-grid gap-3"><a href="/Clients/Create" class="quick-action-btn text-center d-flex justify-content-between p-3"><span><i class="fas fa-user-plus me-2"></i>Add New Client</span><i class="fas fa-arrow-right"></i></a><a href="/Contracts/Create" class="quick-action-btn text-center d-flex justify-content-between p-3"><span><i class="fas fa-file-signature me-2"></i>Create Contract</span><i class="fas fa-arrow-right"></i></a><a href="/ServiceRequests/Create" class="quick-action-btn text-center d-flex justify-content-between p-3"><span><i class="fas fa-headset me-2"></i>Submit Service Request</span><i class="fas fa-arrow-right"></i></a></div></div></div></div>
-</div>
+        function animateCount(el, target, duration) {
+            var start = 0, startTime = null;
+            el.textContent = '0';
+            function step(ts) {
+                if (!startTime) startTime = ts;
+                var progress = Math.min((ts - startTime) / duration, 1);
+                var eased = 1 - Math.pow(1 - progress, 3);
+                el.textContent = Math.floor(eased * target);
+                if (progress < 1) requestAnimationFrame(step);
+                else el.textContent = target;
+            }
+            requestAnimationFrame(step);
+        }
 
-<script>
-    let contractChart, statusChart;
-    $(document).ready(function() { loadStats(); loadRecent(); });
-    function loadStats() {
-        $.get('/api/dashboard/stats', function(data) {
-            $('#totalClients').text(data.totalClients);
-            $('#totalContracts').text(data.totalContracts);
-            $('#totalRequests').text(data.totalRequests);
-            $('#activeContracts').text(data.activeContracts);
-            if (contractChart) contractChart.destroy();
-            if (statusChart) statusChart.destroy();
-            contractChart = new Chart(document.getElementById('contractChart'), {
-                type: 'line', data: { labels: data.monthlyContracts.labels, datasets: [{ label: 'Contracts Created', data: data.monthlyContracts.values, borderColor: '#34495E', backgroundColor: 'rgba(52,73,94,0.1)', borderWidth: 3, fill: true, tension: 0.4 }] },
-                options: { responsive: true, maintainAspectRatio: false }
+        $(document).ready(function () {
+            loadStats();
+            loadRecent();
+        });
+
+        function loadStats() {
+            $.get('/api/dashboard/stats', function (data) {
+                animateCount(document.getElementById('totalClients'), data.totalClients, 1200);
+                animateCount(document.getElementById('totalContracts'), data.totalContracts, 1400);
+                animateCount(document.getElementById('totalRequests'), data.totalRequests, 1100);
+                animateCount(document.getElementById('activeContracts'), data.activeContracts, 1300);
+
+                if (contractChart) contractChart.destroy();
+                if (statusChart) statusChart.destroy();
+
+                Chart.defaults.color = '#6B7894';
+                Chart.defaults.font.family = "'DM Mono', monospace";
+                Chart.defaults.font.size = 10;
+
+                contractChart = new Chart(document.getElementById('contractChart'), {
+                    type: 'line',
+                    data: {
+                        labels: data.monthlyContracts.labels,
+                        datasets: [{
+                            label: 'Contracts',
+                            data: data.monthlyContracts.values,
+                            borderColor: '#63D2BE',
+                            backgroundColor: 'rgba(99,210,190,0.08)',
+                            borderWidth: 2.5,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#63D2BE',
+                            pointBorderColor: '#1C2540',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#161D2E',
+                                borderColor: 'rgba(99,210,190,0.3)',
+                                borderWidth: 1,
+                                titleColor: '#63D2BE',
+                                bodyColor: '#F0F4FF',
+                                padding: 10
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+                                ticks: { color: '#6B7894' }
+                            },
+                            y: {
+                                grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+                                ticks: { color: '#6B7894', stepSize: 1 },
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+                var statusColors = ['#63D2BE', '#F4A535', '#F05A5A', '#3A4460'];
+                statusChart = new Chart(document.getElementById('statusChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.statusDistribution.labels,
+                        datasets: [{
+                            data: data.statusDistribution.values,
+                            backgroundColor: statusColors,
+                            borderWidth: 3,
+                            borderColor: '#1C2540',
+                            hoverBorderColor: '#1C2540'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        cutout: '65%',
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#161D2E',
+                                borderColor: 'rgba(99,210,190,0.3)',
+                                borderWidth: 1,
+                                titleColor: '#63D2BE',
+                                bodyColor: '#F0F4FF'
+                            }
+                        }
+                    }
+                });
+
+                // Custom legend
+                var legendHtml = '';
+                data.statusDistribution.labels.forEach(function (lbl, i) {
+                    legendHtml += `<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;font-size:0.72rem;">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <div style="width:8px;height:8px;border-radius:50%;background:${statusColors[i]};flex-shrink:0"></div>
+                            <span style="color:var(--tm-muted)">${lbl}</span>
+                        </div>
+                        <span style="font-family:var(--font-mono);font-weight:500;color:${statusColors[i]}">${data.statusDistribution.values[i]}</span>
+                    </div>`;
+                });
+                document.getElementById('statusLegend').innerHTML = legendHtml;
+
+            }).fail(function () { console.error('Stats API failed'); });
+        }
+
+        function loadRecent() {
+            $.get('/api/dashboard/recent-requests', function (data) {
+                if (!data || data.length === 0) {
+                    $('#recentRequests').html('<li style="padding:2.5rem;text-align:center;color:var(--tm-muted);font-family:var(--font-mono);font-size:0.75rem;">No recent requests</li>');
+                    return;
+                }
+
+                var initials = function (str) {
+                    return str ? str.split(' ').map(function (w) { return w[0]; }).slice(0, 2).join('').toUpperCase() : '??';
+                };
+
+                var avatarColors = [
+                    { bg: 'rgba(99,210,190,0.12)', color: '#63D2BE' },
+                    { bg: 'rgba(90,219,142,0.10)', color: '#5ADB8E' },
+                    { bg: 'rgba(244,165,53,0.12)',  color: '#F4A535' },
+                    { bg: 'rgba(240,90,90,0.10)',   color: '#F05A5A' },
+                    { bg: 'rgba(107,120,148,0.12)', color: '#6B7894' }
+                ];
+
+                var html = '';
+                data.forEach(function (r, i) {
+                    var av = avatarColors[i % avatarColors.length];
+                    var badgeClass = r.status === 'Pending' ? 'tm-badge-pending'
+                        : r.status === 'Approved' ? 'tm-badge-active'
+                        : r.status === 'Draft' ? 'tm-badge-draft'
+                        : 'tm-badge-expired';
+                    html += `<li class="tm-req-item">
+                        <div class="tm-req-avatar" style="background:${av.bg};color:${av.color}">${initials(r.description)}</div>
+                        <div style="flex:1;min-width:0">
+                            <div class="tm-req-desc" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.description}</div>
+                            <div class="tm-req-meta">Contract: ${r.contractName}</div>
+                        </div>
+                        <div style="text-align:right;flex-shrink:0">
+                            <span class="tm-badge ${badgeClass}">${r.status}</span>
+                            <div class="tm-req-date">${new Date(r.date).toLocaleDateString('en-ZA', {day:'2-digit',month:'short',year:'numeric'})}</div>
+                        </div>
+                    </li>`;
+                });
+                $('#recentRequests').html(html);
+            }).fail(function () {
+                $('#recentRequests').html('<li style="padding:2rem;text-align:center;color:var(--tm-red);font-size:0.75rem;">Error loading data</li>');
             });
-            statusChart = new Chart(document.getElementById('statusChart'), {
-                type: 'doughnut', data: { labels: data.statusDistribution.labels, datasets: [{ data: data.statusDistribution.values, backgroundColor: ['#27AE60','#F39C12','#E74C3C','#95A5A6'], borderWidth: 0 }] },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '60%' }
-            });
-        }).fail(() => { console.error('Stats API failed'); });
-    }
-    function loadRecent() {
-        $.get('/api/dashboard/recent-requests', function(data) {
-            if (data.length === 0) { $('#recentRequests').html('<div class="text-center p-5">No recent requests</div>'); return; }
-            let html = '<div class="list-group list-group-flush">';
-            data.forEach(r => {
-                let statusClass = r.status === 'Pending' ? 'badge-pending' : (r.status === 'Approved' ? 'badge-active' : 'badge-expired');
-                html += `<div class="list-group-item d-flex justify-content-between align-items-center"><div><div class="fw-semibold">${r.description}</div><small class="text-secondary">Contract: ${r.contractName}</small></div><div class="text-end"><span class="badge-status ${statusClass}">${r.status}</span><div><small class="text-secondary">${new Date(r.date).toLocaleDateString()}</small></div></div></div>`;
-            });
-            html += '</div>';
-            $('#recentRequests').html(html);
-        }).fail(() => { $('#recentRequests').html('<div class="text-center p-5 text-danger">Error loading data</div>'); });
-    }
-</script>
+        }
+    </script>
+}

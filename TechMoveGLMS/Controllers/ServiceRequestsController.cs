@@ -1,13 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using TechMoveGLMS.Data;
 using TechMoveGLMS.Models;
 using TechMoveGLMS.Services;
-using System.Globalization;
 
 namespace TechMoveGLMS.Controllers
 {
+    [Authorize]
     public class ServiceRequestsController : Controller
     {
         private readonly AppDbContext _context;
