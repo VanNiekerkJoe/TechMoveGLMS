@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -90,3 +90,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+// ✅ ADD THIS LINE - Required for integration tests to reference the Program class
+public partial class Program { }
