@@ -23,7 +23,6 @@
 - [API Endpoints](#api-endpoints)
 - [Testing](#testing)
 - [Database Schema](#database-schema)
-- [Video Demonstration](#video-demonstration)
 - [Author](#author)
 
 ---
@@ -39,21 +38,21 @@ TechMove Logistics previously relied on spreadsheets, emails, and phone calls to
 ## ✨ Features
 
 ### Core Functionality
-- ✅ **Client Management** – Full CRUD operations for clients
-- ✅ **Contract Management** – Create, edit, delete contracts with PDF upload
-- ✅ **Service Requests** – Submit requests with live USD → ZAR conversion
-- ✅ **Business Rule** – Cannot create requests on Expired or On-Hold contracts
-- ✅ **Search & Filter** – LINQ-powered filtering by date range and status
+- ✅ Client Management – Full CRUD operations for clients
+- ✅ Contract Management – Create, edit, delete contracts with PDF upload
+- ✅ Service Requests – Submit requests with live USD to ZAR conversion
+- ✅ Business Rule – Cannot create requests on Expired or On-Hold contracts
+- ✅ Search & Filter – LINQ-powered filtering by date range and status
 
 ### Technical Features
-- ✅ **SQL Server Database** – Entity Framework Core with migrations
-- ✅ **Currency API Integration** – Live exchange rates from ExchangeRate-API
-- ✅ **JWT Authentication** – Secure API access with JSON Web Tokens
-- ✅ **Interactive Dashboard** – Real-time statistics and charts using Chart.js
-- ✅ **Unit Testing** – xUnit tests for business logic and validation
-- ✅ **Integration Testing** – API endpoint tests for CI/CD pipelines
-- ✅ **Modern UI** – Responsive design with Bootstrap 5 and custom styling
-- ✅ **Docker Containerization** – Full containerized deployment with Docker Compose
+- ✅ SQL Server Database – Entity Framework Core with migrations
+- ✅ Currency API Integration – Live exchange rates from ExchangeRate-API
+- ✅ JWT Authentication – Secure API access with JSON Web Tokens
+- ✅ Interactive Dashboard – Real-time statistics and charts using Chart.js
+- ✅ Unit Testing – xUnit tests for business logic and validation
+- ✅ Integration Testing – API endpoint tests for CI/CD pipelines
+- ✅ Modern UI – Responsive design with Bootstrap 5 and custom styling
+- ✅ Docker Containerization – Full containerized deployment with Docker Compose
 
 ---
 
@@ -61,19 +60,242 @@ TechMove Logistics previously relied on spreadsheets, emails, and phone calls to
 
 | Category | Technology |
 |----------|------------|
-| **Framework** | ASP.NET Core MVC (.NET 8) |
-| **API** | ASP.NET Core Web API (.NET 8) |
-| **Database** | SQL Server 2022 Express |
-| **ORM** | Entity Framework Core |
-| **Frontend** | Bootstrap 5, Chart.js, Font Awesome |
-| **Testing** | xUnit, Moq |
-| **API Integration** | ExchangeRate-API |
-| **Containerization** | Docker, Docker Compose |
-| **Authentication** | JWT Bearer Tokens |
-| **Version Control** | Git & GitHub |
+| Framework | ASP.NET Core MVC (.NET 8) |
+| API | ASP.NET Core Web API (.NET 8) |
+| Database | SQL Server 2022 Express |
+| ORM | Entity Framework Core |
+| Frontend | Bootstrap 5, Chart.js, Font Awesome |
+| Testing | xUnit, Moq |
+| API Integration | ExchangeRate-API |
+| Containerization | Docker, Docker Compose |
+| Authentication | JWT Bearer Tokens |
 
 ---
 
 ## 🏗 Architecture
 
-The system follows a **Service-Oriented Architecture (SOA)** with three main components:
+The system follows a Service-Oriented Architecture (SOA) with three main components:
+
+MVC Frontend (Port 5000) → Web API (Port 5001) → SQL Server Database (Port 1433)
+
+### Docker Containers
+
+| Container | Purpose | Port |
+|-----------|---------|------|
+| glms-frontend-web | MVC Frontend | 5000 |
+| glms-backend-api | Web API | 5001 |
+| sql-server-db | SQL Server Database | 1433 |
+
+---
+
+## 📋 Prerequisites
+
+| Software | Version | Download |
+|----------|---------|----------|
+| Docker Desktop | Latest | docker.com |
+| .NET SDK | 8.0 | dotnet.microsoft.com |
+| Visual Studio 2022 | Latest | visualstudio.microsoft.com |
+| Git | Latest | git-scm.com |
+
+---
+
+## 🚀 Installation
+
+### 1. Clone the Repository
+
+git clone https://github.com/YOUR_USERNAME/TechMoveGLMS.git
+cd TechMoveGLMS
+2. Get an ExchangeRate-API Key
+Go to ExchangeRate-API Sign Up
+
+Create a free account
+
+Verify your email
+
+Copy your API key
+
+3. Configure API Key
+Update both appsettings.json files:
+
+json
+{
+  "ExchangeRateApi": {
+    "ApiKey": "YOUR_API_KEY_HERE"
+  }
+}
+🐳 Running with Docker (Recommended)
+Start All Containers
+bash
+docker-compose up -d
+Check Container Status
+bash
+docker ps
+Access the Application
+Application	URL
+MVC Frontend	http://localhost:5000
+API Swagger	http://localhost:5001/swagger
+Login Credentials
+Username	Password	Role
+admin	admin123	Administrator
+manager	manager123	Manager
+user	user123	User
+Stop Containers
+bash
+docker-compose down
+Rebuild Containers
+bash
+docker-compose down -v
+docker-compose up -d --build
+💻 Running Locally (Without Docker)
+Step 1: Update Connection Strings
+Update TechMoveGLMS/appsettings.json:
+
+json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=YOUR_SERVER\\SQLEXPRESS;Database=TechMoveGLMS;Trusted_Connection=True;TrustServerCertificate=true;"
+  },
+  "ApiSettings": {
+    "BaseUrl": "http://localhost:5001"
+  }
+}
+Update TechMoveGLMS.API/appsettings.json:
+
+json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=YOUR_SERVER\\SQLEXPRESS;Database=TechMoveGLMS;Trusted_Connection=True;TrustServerCertificate=true;"
+  }
+}
+Step 2: Apply Migrations
+bash
+cd TechMoveGLMS
+dotnet ef database update
+Step 3: Run the API
+bash
+cd TechMoveGLMS.API
+dotnet run
+Step 4: Run the MVC App
+bash
+cd TechMoveGLMS
+dotnet run
+🔌 API Endpoints
+Authentication
+Method	Endpoint	Description
+POST	/api/auth/login	Login and get JWT token
+POST	/api/auth/register	Register new user
+Clients
+Method	Endpoint	Description
+GET	/api/Clients	Get all clients
+GET	/api/Clients/{id}	Get client by ID
+POST	/api/Clients	Create new client
+PUT	/api/Clients/{id}	Update client
+DELETE	/api/Clients/{id}	Delete client
+Contracts
+Method	Endpoint	Description
+GET	/api/Contracts	Get all contracts (with filtering)
+GET	/api/Contracts/{id}	Get contract by ID
+POST	/api/Contracts	Create new contract
+PATCH	/api/Contracts/{id}/status	Update contract status
+DELETE	/api/Contracts/{id}	Delete contract
+Service Requests
+Method	Endpoint	Description
+GET	/api/ServiceRequests	Get all service requests
+GET	/api/ServiceRequests/{id}	Get request by ID
+POST	/api/ServiceRequests	Create service request
+PATCH	/api/ServiceRequests/{id}/status	Update request status
+DELETE	/api/ServiceRequests/{id}	Delete request
+Dashboard
+Method	Endpoint	Description
+GET	/api/dashboard/stats	Get dashboard statistics
+GET	/api/dashboard/recent-requests	Get recent requests
+Filtering Example
+text
+GET /api/Contracts?startDate=2025-01-01&endDate=2025-12-31&status=1
+🧪 Testing
+Run Unit Tests
+bash
+dotnet test
+In Visual Studio
+Open Test Explorer (Test → Test Explorer)
+
+Click Run All Tests
+
+All tests should pass (green)
+
+Test Categories
+Test File	What it Tests
+CurrencyCalculatorTests.cs	USD to ZAR conversion math
+FileValidationTests.cs	PDF file validation
+ServiceRequestRuleTests.cs	Business rules
+ApiIntegrationTests.cs	API endpoint integration
+🗄 Database Schema
+Tables
+Table	Description
+Clients	Client information (Name, ContactDetails, Region)
+Contracts	Contract details linked to Clients
+ServiceRequests	Service requests linked to Contracts
+__EFMigrationsHistory	EF Core migration tracking
+Relationships
+Clients (1) → (Many) Contracts
+
+Contracts (1) → (Many) ServiceRequests
+
+Sample Data Script
+sql
+INSERT INTO Clients (Name, ContactDetails, Region) 
+VALUES ('TechMove Logistics', 'info@techmove.com', 'Gauteng');
+
+INSERT INTO Contracts (ClientId, StartDate, EndDate, Status, ServiceLevel) 
+VALUES (1, '2025-01-01', '2025-12-31', 1, 'Premium');
+
+INSERT INTO ServiceRequests (ContractId, Description, CostUSD, CostZAR, Status, CreatedDate) 
+VALUES (1, 'Urgent shipment', 500.00, 8273.60, 0, GETDATE());
+📁 Project Structure
+text
+TechMoveGLMS/
+├── TechMoveGLMS/                 # MVC Frontend Project
+│   ├── Controllers/              # MVC Controllers
+│   ├── Views/                    # Razor Views
+│   ├── Models/                   # Domain Models
+│   ├── Services/                 # ApiService, CurrencyService
+│   ├── Program.cs                # Entry point
+│   ├── appsettings.json          # Configuration
+│   └── Dockerfile                # Docker configuration
+├── TechMoveGLMS.API/             # Web API Project
+│   ├── Controllers/              # API Controllers
+│   ├── Models/                   # Domain Models
+│   ├── DTOs/                     # Data Transfer Objects
+│   ├── Data/                     # DbContext
+│   ├── Program.cs                # Entry point
+│   ├── appsettings.json          # Configuration
+│   └── Dockerfile                # Docker configuration
+├── TechMoveGLMS.Tests/           # Test Project
+│   ├── UnitTests/                # Unit tests
+│   ├── IntegrationTests/         # API integration tests
+│   └── TechMoveGLMS.Tests.csproj
+├── docker-compose.yml            # Docker Compose configuration
+└── README.md                     # This file
+👨‍💻 Author
+Name	Leo van Niekerk
+Student Number	ST10445055
+Module	PROG7311
+Institution	The Independent Institute of Education
+🙏 Acknowledgements
+ExchangeRate-API for free currency conversion
+
+Bootstrap for responsive design
+
+Chart.js for dashboard charts
+
+Font Awesome for icons
+
+Docker for containerization
+
+📄 License
+This project was developed for academic purposes as part of the PROG7311 module.
+
+⭐ Star this Repository
+If you found this project helpful, please star it on GitHub!
+
+Built with ❤️ for PROG7311
