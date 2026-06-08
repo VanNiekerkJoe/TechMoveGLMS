@@ -10,10 +10,12 @@ namespace TechMoveGLMS.Controllers
     public class ClientsController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public ClientsController(AppDbContext context)
+        public ClientsController(AppDbContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
         // GET: Clients
@@ -47,16 +49,11 @@ namespace TechMoveGLMS.Controllers
         // GET: Clients/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var client = await _context.Clients.FindAsync(id);
-            if (client == null)
-            {
-                return NotFound();
-            }
+            if (client == null) return NotFound();
+
             return View(client);
         }
 
@@ -65,10 +62,7 @@ namespace TechMoveGLMS.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ClientId,Name,ContactDetails,Region")] Client client)
         {
-            if (id != client.ClientId)
-            {
-                return NotFound();
-            }
+            if (id != client.ClientId) return NotFound();
 
             if (ModelState.IsValid)
             {
@@ -80,14 +74,8 @@ namespace TechMoveGLMS.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ClientExists(client.ClientId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!ClientExists(client.ClientId)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -97,17 +85,15 @@ namespace TechMoveGLMS.Controllers
         // GET: Clients/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var client = await _context.Clients
                 .FirstOrDefaultAsync(m => m.ClientId == id);
-            if (client == null)
-            {
-                return NotFound();
-            }
+            if (client == null) return NotFound();
+
+            // Warn if client has linked contracts
+            var contractCount = await _context.Contracts.CountAsync(c => c.ClientId == id);
+            ViewBag.ContractCount = contractCount;
 
             return View(client);
         }
@@ -120,9 +106,31 @@ namespace TechMoveGLMS.Controllers
             var client = await _context.Clients.FindAsync(id);
             if (client != null)
             {
+                // Load and delete all linked contracts (and their PDF files) first
+                var contracts = await _context.Contracts
+                    .Where(c => c.ClientId == id)
+                    .ToListAsync();
+
+                foreach (var contract in contracts)
+                {
+                    // Delete associated PDF file if it exists
+                    if (!string.IsNullOrEmpty(contract.SignedAgreementPath))
+                    {
+                        string filePath = Path.Combine(
+                            _env.WebRootPath,
+                            contract.SignedAgreementPath.TrimStart('/'));
+
+                        if (System.IO.File.Exists(filePath))
+                            System.IO.File.Delete(filePath);
+                    }
+                }
+
+                // Remove contracts first, then client
+                _context.Contracts.RemoveRange(contracts);
                 _context.Clients.Remove(client);
                 await _context.SaveChangesAsync();
-                TempData["Success"] = "Client deleted successfully!";
+
+                TempData["Success"] = $"Client and {contracts.Count} associated contract(s) deleted successfully!";
             }
 
             return RedirectToAction(nameof(Index));

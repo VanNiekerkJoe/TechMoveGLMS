@@ -80,9 +80,7 @@ namespace TechMoveGLMS.Controllers
 
                         string uploadsFolder = Path.Combine(_env.WebRootPath, "contracts");
                         if (!Directory.Exists(uploadsFolder))
-                        {
                             Directory.CreateDirectory(uploadsFolder);
-                        }
 
                         string uniqueFileName = $"{contract.ContractId}_{Guid.NewGuid()}.pdf";
                         string filePath = Path.Combine(uploadsFolder, uniqueFileName);
@@ -113,16 +111,10 @@ namespace TechMoveGLMS.Controllers
         // GET: Contracts/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var contract = await _context.Contracts.FindAsync(id);
-            if (contract == null)
-            {
-                return NotFound();
-            }
+            if (contract == null) return NotFound();
 
             ViewBag.ClientId = new SelectList(_context.Clients, "ClientId", "Name", contract.ClientId);
             return View(contract);
@@ -131,89 +123,100 @@ namespace TechMoveGLMS.Controllers
         // POST: Contracts/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Contract contract, IFormFile signedAgreement)
+        public async Task<IActionResult> Edit(int id, Contract contract, IFormFile? signedAgreement)
         {
-            if (id != contract.ContractId)
-            {
-                return NotFound();
-            }
+            if (id != contract.ContractId) return NotFound();
 
+            // Remove nav-property and file-path validation — we handle these manually
             ModelState.Remove("Client");
             ModelState.Remove("ServiceRequests");
             ModelState.Remove("SignedAgreementPath");
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
+                ViewBag.ClientId = new SelectList(_context.Clients, "ClientId", "Name", contract.ClientId);
+                return View(contract);
+            }
+
+            try
+            {
+                // Always fetch the tracked entity from DB so EF doesn't conflict
+                var existingContract = await _context.Contracts
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(c => c.ContractId == id);
+
+                if (existingContract == null) return NotFound();
+
+                // Apply scalar updates
+                existingContract.ClientId = contract.ClientId;
+                existingContract.StartDate = contract.StartDate;
+                existingContract.EndDate = contract.EndDate;
+                existingContract.Status = contract.Status;
+                existingContract.ServiceLevel = contract.ServiceLevel;
+
+                // Handle optional new PDF upload
+                if (signedAgreement != null && signedAgreement.Length > 0)
                 {
-                    var existingContract = await _context.Contracts.FindAsync(id);
-                    if (existingContract == null)
+                    var extension = Path.GetExtension(signedAgreement.FileName).ToLower();
+                    if (extension != ".pdf")
                     {
-                        return NotFound();
+                        ModelState.AddModelError("signedAgreement", "Only PDF files are allowed.");
+                        ViewBag.ClientId = new SelectList(_context.Clients, "ClientId", "Name", contract.ClientId);
+                        // Restore path so the view still shows the current file link
+                        contract.SignedAgreementPath = existingContract.SignedAgreementPath;
+                        return View(contract);
                     }
 
-                    // Update properties
-                    existingContract.ClientId = contract.ClientId;
-                    existingContract.StartDate = contract.StartDate;
-                    existingContract.EndDate = contract.EndDate;
-                    existingContract.Status = contract.Status;
-                    existingContract.ServiceLevel = contract.ServiceLevel;
-
-                    // Handle new file upload
-                    if (signedAgreement != null && signedAgreement.Length > 0)
+                    if (signedAgreement.Length > 10 * 1024 * 1024)
                     {
-                        var extension = Path.GetExtension(signedAgreement.FileName).ToLower();
-                        if (extension != ".pdf")
-                        {
-                            ModelState.AddModelError("signedAgreement", "Only PDF files are allowed.");
-                            ViewBag.ClientId = new SelectList(_context.Clients, "ClientId", "Name", contract.ClientId);
-                            return View(contract);
-                        }
-
-                        // Delete old file
-                        if (!string.IsNullOrEmpty(existingContract.SignedAgreementPath))
-                        {
-                            string oldFilePath = Path.Combine(_env.WebRootPath, existingContract.SignedAgreementPath.TrimStart('/'));
-                            if (System.IO.File.Exists(oldFilePath))
-                            {
-                                System.IO.File.Delete(oldFilePath);
-                            }
-                        }
-
-                        // Save new file
-                        string uploadsFolder = Path.Combine(_env.WebRootPath, "contracts");
-                        if (!Directory.Exists(uploadsFolder))
-                        {
-                            Directory.CreateDirectory(uploadsFolder);
-                        }
-
-                        string uniqueFileName = $"{existingContract.ContractId}_{Guid.NewGuid()}.pdf";
-                        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await signedAgreement.CopyToAsync(stream);
-                        }
-
-                        existingContract.SignedAgreementPath = $"/contracts/{uniqueFileName}";
+                        ModelState.AddModelError("signedAgreement", "File size cannot exceed 10MB.");
+                        ViewBag.ClientId = new SelectList(_context.Clients, "ClientId", "Name", contract.ClientId);
+                        contract.SignedAgreementPath = existingContract.SignedAgreementPath;
+                        return View(contract);
                     }
 
-                    _context.Update(existingContract);
-                    await _context.SaveChangesAsync();
-                    TempData["Success"] = "Contract updated successfully!";
-                    return RedirectToAction(nameof(Index));
+                    // Delete old PDF if present
+                    if (!string.IsNullOrEmpty(existingContract.SignedAgreementPath))
+                    {
+                        string oldFilePath = Path.Combine(
+                            _env.WebRootPath,
+                            existingContract.SignedAgreementPath.TrimStart('/'));
+
+                        if (System.IO.File.Exists(oldFilePath))
+                            System.IO.File.Delete(oldFilePath);
+                    }
+
+                    // Save new PDF
+                    string uploadsFolder = Path.Combine(_env.WebRootPath, "contracts");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+
+                    string uniqueFileName = $"{existingContract.ContractId}_{Guid.NewGuid()}.pdf";
+                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await signedAgreement.CopyToAsync(stream);
+                    }
+
+                    existingContract.SignedAgreementPath = $"/contracts/{uniqueFileName}";
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ContractExists(contract.ContractId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                // else: keep existing SignedAgreementPath unchanged (already set from DB)
+
+                _context.Update(existingContract);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Contract updated successfully!";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ContractExists(contract.ContractId)) return NotFound();
+                throw;
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Error updating contract: {ex.Message}");
             }
 
             ViewBag.ClientId = new SelectList(_context.Clients, "ClientId", "Name", contract.ClientId);
@@ -223,18 +226,13 @@ namespace TechMoveGLMS.Controllers
         // GET: Contracts/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var contract = await _context.Contracts
                 .Include(c => c.Client)
                 .FirstOrDefaultAsync(m => m.ContractId == id);
-            if (contract == null)
-            {
-                return NotFound();
-            }
+
+            if (contract == null) return NotFound();
 
             return View(contract);
         }
@@ -247,14 +245,14 @@ namespace TechMoveGLMS.Controllers
             var contract = await _context.Contracts.FindAsync(id);
             if (contract != null)
             {
-                // Delete associated PDF file
                 if (!string.IsNullOrEmpty(contract.SignedAgreementPath))
                 {
-                    string filePath = Path.Combine(_env.WebRootPath, contract.SignedAgreementPath.TrimStart('/'));
+                    string filePath = Path.Combine(
+                        _env.WebRootPath,
+                        contract.SignedAgreementPath.TrimStart('/'));
+
                     if (System.IO.File.Exists(filePath))
-                    {
                         System.IO.File.Delete(filePath);
-                    }
                 }
 
                 _context.Contracts.Remove(contract);
@@ -268,16 +266,10 @@ namespace TechMoveGLMS.Controllers
         // GET: Contracts/Download
         public IActionResult Download(string filePath)
         {
-            if (string.IsNullOrEmpty(filePath))
-            {
-                return NotFound();
-            }
+            if (string.IsNullOrEmpty(filePath)) return NotFound();
 
             string fullPath = Path.Combine(_env.WebRootPath, filePath.TrimStart('/'));
-            if (!System.IO.File.Exists(fullPath))
-            {
-                return NotFound();
-            }
+            if (!System.IO.File.Exists(fullPath)) return NotFound();
 
             byte[] fileBytes = System.IO.File.ReadAllBytes(fullPath);
             return File(fileBytes, "application/pdf", Path.GetFileName(fullPath));

@@ -1,0 +1,31 @@
+﻿@model TechMoveGLMS.Models.Client
+
+<h2>Test Form</h2>
+
+<form method="post" action="/Clients/Create">
+    @Html.AntiForgeryToken()
+
+    <div>
+        <label>Name:</label>
+        <input name="Name" class="form-control" />
+    </div>
+
+    <div>
+        <label>Contact Details:</label>
+        <input name="ContactDetails" class="form-control" />
+    </div>
+
+    <div>
+        <label>Region:</label>
+        <input name="Region" class="form-control" />
+    </div>
+
+    <button type="submit">Create Client</button>
+</form>
+
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        console.log("Form is submitting!");
+        alert("Form submitted!");
+    });
+</script>
