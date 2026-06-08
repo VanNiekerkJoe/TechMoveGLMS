@@ -12,18 +12,18 @@
 
 ## 📋 Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-- [Technologies Used](#technologies-used)
-- [Architecture](#architecture)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Running with Docker](#running-with-docker)
-- [Running Locally](#running-locally)
-- [API Endpoints](#api-endpoints)
-- [Testing](#testing)
-- [Database Schema](#database-schema)
-- [Author](#author)
+- [Overview](#-overview)
+- [Architecture](#-architecture)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Prerequisites](#-prerequisites)
+- [Quick Start (Docker)](#-quick-start-docker)
+- [Running Locally](#-running-locally-without-docker)
+- [API Endpoints](#-api-endpoints)
+- [Testing](#-testing)
+- [Database Schema](#-database-schema)
+- [Project Structure](#-project-structure)
+- [Author](#-author)
 
 ---
 
@@ -31,32 +31,49 @@
 
 TechMove Logistics previously relied on spreadsheets, emails, and phone calls to manage freight contracts, driver schedules, and invoicing. This fragmented approach led to missing documents, expired contracts going unnoticed, and operational delays.
 
-**TechMove GLMS** solves these challenges by providing a centralized, web-based platform that brings all major operations into one place.
+**TechMove GLMS** solves these challenges by providing a centralised, web-based platform that brings all major operations into one place.
+
+---
+
+## 🏗 Architecture
+
+The system follows a Service-Oriented Architecture (SOA) with three main components:
+
+```
+MVC Frontend (Port 5000)  →  Web API (Port 5001)  →  SQL Server Database (Port 1433)
+  glms-frontend-web              glms-backend-api            sql-server-db
+```
+
+| Container | Purpose | Port |
+|-----------|---------|------|
+| `glms-frontend-web` | MVC Frontend | 5000 |
+| `glms-backend-api` | Web API | 5001 |
+| `sql-server-db` | SQL Server Database | 1433 |
 
 ---
 
 ## ✨ Features
 
 ### Core Functionality
-- ✅ Client Management – Full CRUD operations for clients
-- ✅ Contract Management – Create, edit, delete contracts with PDF upload
-- ✅ Service Requests – Submit requests with live USD to ZAR conversion
-- ✅ Business Rule – Cannot create requests on Expired or On-Hold contracts
-- ✅ Search & Filter – LINQ-powered filtering by date range and status
+- ✅ **Client Management** — Full CRUD operations for clients
+- ✅ **Contract Management** — Create, edit, delete contracts with PDF upload
+- ✅ **Service Requests** — Submit requests with live USD → ZAR conversion
+- ✅ **Business Rules** — Cannot create requests on Expired or On-Hold contracts
+- ✅ **Search & Filter** — LINQ-powered filtering by date range and status
 
 ### Technical Features
-- ✅ SQL Server Database – Entity Framework Core with migrations
-- ✅ Currency API Integration – Live exchange rates from ExchangeRate-API
-- ✅ JWT Authentication – Secure API access with JSON Web Tokens
-- ✅ Interactive Dashboard – Real-time statistics and charts using Chart.js
-- ✅ Unit Testing – xUnit tests for business logic and validation
-- ✅ Integration Testing – API endpoint tests for CI/CD pipelines
-- ✅ Modern UI – Responsive design with Bootstrap 5 and custom styling
-- ✅ Docker Containerization – Full containerized deployment with Docker Compose
+- ✅ **SQL Server Database** — Entity Framework Core with migrations
+- ✅ **Currency API Integration** — Live exchange rates from ExchangeRate-API
+- ✅ **JWT Authentication** — Secure API access with JSON Web Tokens
+- ✅ **Interactive Dashboard** — Real-time statistics and charts using Chart.js
+- ✅ **Unit Testing** — xUnit tests for business logic and validation
+- ✅ **Integration Testing** — API endpoint tests for CI/CD pipelines
+- ✅ **Modern UI** — Responsive design with Bootstrap 5 and custom styling
+- ✅ **Docker Containerisation** — Full containerised deployment with Docker Compose
 
 ---
 
-## 🛠 Technologies Used
+## 🛠 Tech Stack
 
 | Category | Technology |
 |----------|------------|
@@ -67,90 +84,87 @@ TechMove Logistics previously relied on spreadsheets, emails, and phone calls to
 | Frontend | Bootstrap 5, Chart.js, Font Awesome |
 | Testing | xUnit, Moq |
 | API Integration | ExchangeRate-API |
-| Containerization | Docker, Docker Compose |
+| Containerisation | Docker, Docker Compose |
 | Authentication | JWT Bearer Tokens |
-
----
-
-## 🏗 Architecture
-
-The system follows a Service-Oriented Architecture (SOA) with three main components:
-
-MVC Frontend (Port 5000) → Web API (Port 5001) → SQL Server Database (Port 1433)
-
-### Docker Containers
-
-| Container | Purpose | Port |
-|-----------|---------|------|
-| glms-frontend-web | MVC Frontend | 5000 |
-| glms-backend-api | Web API | 5001 |
-| sql-server-db | SQL Server Database | 1433 |
 
 ---
 
 ## 📋 Prerequisites
 
-| Software | Version | Download |
-|----------|---------|----------|
-| Docker Desktop | Latest | docker.com |
-| .NET SDK | 8.0 | dotnet.microsoft.com |
-| Visual Studio 2022 | Latest | visualstudio.microsoft.com |
-| Git | Latest | git-scm.com |
+| Software | Version |
+|----------|---------|
+| Docker Desktop | Latest |
+| .NET SDK | 8.0 |
+| Visual Studio 2022 | Latest |
+| Git | Latest |
 
 ---
 
-## 🚀 Installation
+## 🚀 Quick Start (Docker)
 
-### 1. Clone the Repository
+### 1. Clone the repository
 
+```bash
 git clone https://github.com/YOUR_USERNAME/TechMoveGLMS.git
 cd TechMoveGLMS
-2. Get an ExchangeRate-API Key
-Go to ExchangeRate-API Sign Up
+```
 
-Create a free account
+### 2. Add your ExchangeRate-API key
 
-Verify your email
+Sign up at [exchangerate-api.com](https://www.exchangerate-api.com/) and update both `appsettings.json` files:
 
-Copy your API key
-
-3. Configure API Key
-Update both appsettings.json files:
-
-json
+```json
 {
   "ExchangeRateApi": {
     "ApiKey": "YOUR_API_KEY_HERE"
   }
 }
-🐳 Running with Docker (Recommended)
-Start All Containers
-bash
+```
+
+### 3. Start all containers
+
+```bash
 docker-compose up -d
-Check Container Status
-bash
+```
+
+### 4. Access the application
+
+| Application | URL |
+|-------------|-----|
+| MVC Frontend | http://localhost:5000 |
+| API Swagger | http://localhost:5001/swagger |
+
+### Default login credentials
+
+| Username | Password | Role |
+|----------|----------|------|
+| admin | admin123 | Administrator |
+| manager | manager123 | Manager |
+| user | user123 | User |
+
+### Useful Docker commands
+
+```bash
+# Check running containers
 docker ps
-Access the Application
-Application	URL
-MVC Frontend	http://localhost:5000
-API Swagger	http://localhost:5001/swagger
-Login Credentials
-Username	Password	Role
-admin	admin123	Administrator
-manager	manager123	Manager
-user	user123	User
-Stop Containers
-bash
+
+# Stop all containers
 docker-compose down
-Rebuild Containers
-bash
+
+# Rebuild from scratch
 docker-compose down -v
 docker-compose up -d --build
-💻 Running Locally (Without Docker)
-Step 1: Update Connection Strings
-Update TechMoveGLMS/appsettings.json:
+```
 
-json
+---
+
+## 💻 Running Locally (Without Docker)
+
+### Step 1: Update connection strings
+
+`TechMoveGLMS/appsettings.json`:
+
+```json
 {
   "ConnectionStrings": {
     "DefaultConnection": "Server=YOUR_SERVER\\SQLEXPRESS;Database=TechMoveGLMS;Trusted_Connection=True;TrustServerCertificate=true;"
@@ -159,100 +173,155 @@ json
     "BaseUrl": "http://localhost:5001"
   }
 }
-Update TechMoveGLMS.API/appsettings.json:
+```
 
-json
+`TechMoveGLMS.API/appsettings.json`:
+
+```json
 {
   "ConnectionStrings": {
     "DefaultConnection": "Server=YOUR_SERVER\\SQLEXPRESS;Database=TechMoveGLMS;Trusted_Connection=True;TrustServerCertificate=true;"
   }
 }
-Step 2: Apply Migrations
-bash
+```
+
+### Step 2: Apply migrations
+
+```bash
 cd TechMoveGLMS
 dotnet ef database update
-Step 3: Run the API
-bash
+```
+
+### Step 3: Run the API
+
+```bash
 cd TechMoveGLMS.API
 dotnet run
-Step 4: Run the MVC App
-bash
+```
+
+### Step 4: Run the MVC app
+
+```bash
 cd TechMoveGLMS
 dotnet run
-🔌 API Endpoints
-Authentication
-Method	Endpoint	Description
-POST	/api/auth/login	Login and get JWT token
-POST	/api/auth/register	Register new user
-Clients
-Method	Endpoint	Description
-GET	/api/Clients	Get all clients
-GET	/api/Clients/{id}	Get client by ID
-POST	/api/Clients	Create new client
-PUT	/api/Clients/{id}	Update client
-DELETE	/api/Clients/{id}	Delete client
-Contracts
-Method	Endpoint	Description
-GET	/api/Contracts	Get all contracts (with filtering)
-GET	/api/Contracts/{id}	Get contract by ID
-POST	/api/Contracts	Create new contract
-PATCH	/api/Contracts/{id}/status	Update contract status
-DELETE	/api/Contracts/{id}	Delete contract
-Service Requests
-Method	Endpoint	Description
-GET	/api/ServiceRequests	Get all service requests
-GET	/api/ServiceRequests/{id}	Get request by ID
-POST	/api/ServiceRequests	Create service request
-PATCH	/api/ServiceRequests/{id}/status	Update request status
-DELETE	/api/ServiceRequests/{id}	Delete request
-Dashboard
-Method	Endpoint	Description
-GET	/api/dashboard/stats	Get dashboard statistics
-GET	/api/dashboard/recent-requests	Get recent requests
-Filtering Example
-text
+```
+
+---
+
+## 🔌 API Endpoints
+
+### Authentication
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/auth/login` | Login and get JWT token |
+| `POST` | `/api/auth/register` | Register new user |
+
+### Clients
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/Clients` | Get all clients |
+| `GET` | `/api/Clients/{id}` | Get client by ID |
+| `POST` | `/api/Clients` | Create new client |
+| `PUT` | `/api/Clients/{id}` | Update client |
+| `DELETE` | `/api/Clients/{id}` | Delete client |
+
+### Contracts
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/Contracts` | Get all contracts (with filtering) |
+| `GET` | `/api/Contracts/{id}` | Get contract by ID |
+| `POST` | `/api/Contracts` | Create new contract |
+| `PATCH` | `/api/Contracts/{id}/status` | Update contract status |
+| `DELETE` | `/api/Contracts/{id}` | Delete contract |
+
+### Service Requests
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/ServiceRequests` | Get all service requests |
+| `GET` | `/api/ServiceRequests/{id}` | Get request by ID |
+| `POST` | `/api/ServiceRequests` | Create service request |
+| `PATCH` | `/api/ServiceRequests/{id}/status` | Update request status |
+| `DELETE` | `/api/ServiceRequests/{id}` | Delete request |
+
+### Dashboard
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/dashboard/stats` | Get dashboard statistics |
+| `GET` | `/api/dashboard/recent-requests` | Get recent requests |
+
+### Filtering example
+
+```
 GET /api/Contracts?startDate=2025-01-01&endDate=2025-12-31&status=1
-🧪 Testing
-Run Unit Tests
-bash
+```
+
+---
+
+## 🧪 Testing
+
+### Run all tests
+
+```bash
 dotnet test
-In Visual Studio
-Open Test Explorer (Test → Test Explorer)
+```
 
-Click Run All Tests
+### In Visual Studio
 
-All tests should pass (green)
+1. Open **Test Explorer** (Test → Test Explorer)
+2. Click **Run All Tests**
+3. All tests should pass ✅
 
-Test Categories
-Test File	What it Tests
-CurrencyCalculatorTests.cs	USD to ZAR conversion math
-FileValidationTests.cs	PDF file validation
-ServiceRequestRuleTests.cs	Business rules
-ApiIntegrationTests.cs	API endpoint integration
-🗄 Database Schema
-Tables
-Table	Description
-Clients	Client information (Name, ContactDetails, Region)
-Contracts	Contract details linked to Clients
-ServiceRequests	Service requests linked to Contracts
-__EFMigrationsHistory	EF Core migration tracking
-Relationships
-Clients (1) → (Many) Contracts
+### Test categories
 
-Contracts (1) → (Many) ServiceRequests
+| Test file | Covers |
+|-----------|--------|
+| `CurrencyCalculatorTests.cs` | USD → ZAR conversion math |
+| `FileValidationTests.cs` | PDF file validation |
+| `ServiceRequestRuleTests.cs` | Business rules enforcement |
+| `ApiIntegrationTests.cs` | API endpoint integration |
 
-Sample Data Script
-sql
-INSERT INTO Clients (Name, ContactDetails, Region) 
+---
+
+## 🗄 Database Schema
+
+### Tables
+
+| Table | Description |
+|-------|-------------|
+| `Clients` | Client information (Name, ContactDetails, Region) |
+| `Contracts` | Contract details linked to Clients |
+| `ServiceRequests` | Service requests linked to Contracts |
+| `__EFMigrationsHistory` | EF Core migration tracking |
+
+### Relationships
+
+```
+Clients (1) ──── (many) Contracts (1) ──── (many) ServiceRequests
+```
+
+### Sample data
+
+```sql
+INSERT INTO Clients (Name, ContactDetails, Region)
 VALUES ('TechMove Logistics', 'info@techmove.com', 'Gauteng');
 
-INSERT INTO Contracts (ClientId, StartDate, EndDate, Status, ServiceLevel) 
+INSERT INTO Contracts (ClientId, StartDate, EndDate, Status, ServiceLevel)
 VALUES (1, '2025-01-01', '2025-12-31', 1, 'Premium');
 
-INSERT INTO ServiceRequests (ContractId, Description, CostUSD, CostZAR, Status, CreatedDate) 
+INSERT INTO ServiceRequests (ContractId, Description, CostUSD, CostZAR, Status, CreatedDate)
 VALUES (1, 'Urgent shipment', 500.00, 8273.60, 0, GETDATE());
-📁 Project Structure
-text
+```
+
+---
+
+## 📁 Project Structure
+
+```
 TechMoveGLMS/
 ├── TechMoveGLMS/                 # MVC Frontend Project
 │   ├── Controllers/              # MVC Controllers
@@ -275,27 +344,36 @@ TechMoveGLMS/
 │   ├── IntegrationTests/         # API integration tests
 │   └── TechMoveGLMS.Tests.csproj
 ├── docker-compose.yml            # Docker Compose configuration
-└── README.md                     # This file
-👨‍💻 Author
-Name	Leo van Niekerk
-Student Number	ST10445055
-Module	PROG7311
-Institution	The Independent Institute of Education
-🙏 Acknowledgements
-ExchangeRate-API for free currency conversion
+└── README.md
+```
 
-Bootstrap for responsive design
+---
 
-Chart.js for dashboard charts
+## 👨‍💻 Author
 
-Font Awesome for icons
+| | |
+|---|---|
+| **Name** | Leo van Niekerk |
+| **Student Number** | ST10445055 |
+| **Module** | PROG7311 |
+| **Institution** | The Independent Institute of Education |
 
-Docker for containerization
+---
 
-📄 License
-This project was developed for academic purposes as part of the PROG7311 module.
+## 🙏 Acknowledgements
 
-⭐ Star this Repository
-If you found this project helpful, please star it on GitHub!
+- [ExchangeRate-API](https://www.exchangerate-api.com/) for free currency conversion
+- [Bootstrap](https://getbootstrap.com/) for responsive design
+- [Chart.js](https://www.chartjs.org/) for dashboard charts
+- [Font Awesome](https://fontawesome.com/) for icons
+- [Docker](https://www.docker.com/) for containerisation
 
-Built with ❤️ for PROG7311
+---
+
+## 📄 License
+
+This project was developed for academic purposes as part of the PROG7311 module at The Independent Institute of Education.
+
+---
+
+*Built with ❤️ for PROG7311*
