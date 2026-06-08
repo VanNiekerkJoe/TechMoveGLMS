@@ -1,81 +1,65 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TechMoveGLMS.MVC.Services;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using TechMoveGLMS.API.Data;
+using TechMoveGLMS.API.Models;
 
-namespace TechMoveGLMS.Controllers
+namespace TechMoveGLMS.API.Controllers
 {
-    public class ClientsController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class ClientsController : ControllerBase
     {
-        private readonly IApiService _apiService;
+        private readonly AppDbContext _context;
 
-        public ClientsController(IApiService apiService)
+        public ClientsController(AppDbContext context)
         {
-            _apiService = apiService;
+            _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetClients()
         {
-            var clients = await _apiService.GetAsync<List<Client>>("api/clients");
-            return View(clients ?? new List<Client>());
+            var clients = await _context.Clients.ToListAsync();
+            return Ok(clients);
         }
 
-        public IActionResult Create() => View();
-
-        [HttpPost]
-        public async Task<IActionResult> Create(Client client)
+        [HttpGet("{id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetClient(int id)
         {
-            if (ModelState.IsValid)
-            {
-                var result = await _apiService.PostAsync<Client>("api/clients", client);
-                if (result != null)
-                    TempData["Success"] = "Client created successfully!";
-                return RedirectToAction(nameof(Index));
-            }
-            return View(client);
-        }
-
-        public async Task<IActionResult> Edit(int id)
-        {
-            var client = await _apiService.GetAsync<Client>($"api/clients/{id}");
+            var client = await _context.Clients.FindAsync(id);
             if (client == null) return NotFound();
-            return View(client);
+            return Ok(client);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(int id, Client client)
+        public async Task<IActionResult> CreateClient([FromBody] Client client)
         {
-            if (id != client.ClientId) return NotFound();
-            if (ModelState.IsValid)
-            {
-                var result = await _apiService.PutAsync<Client>($"api/clients/{id}", client);
-                if (result != null)
-                    TempData["Success"] = "Client updated successfully!";
-                return RedirectToAction(nameof(Index));
-            }
-            return View(client);
+            _context.Clients.Add(client);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetClient), new { id = client.ClientId }, client);
         }
 
-        public async Task<IActionResult> Delete(int id)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateClient(int id, [FromBody] Client client)
         {
-            var client = await _apiService.GetAsync<Client>($"api/clients/{id}");
+            if (id != client.ClientId) return BadRequest();
+            _context.Entry(client).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return Ok(client);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteClient(int id)
+        {
+            var client = await _context.Clients.FindAsync(id);
             if (client == null) return NotFound();
-            return View(client);
+            _context.Clients.Remove(client);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Client deleted successfully" });
         }
-
-        [HttpPost, ActionName("Delete")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var success = await _apiService.DeleteAsync($"api/clients/{id}");
-            if (success)
-                TempData["Success"] = "Client deleted successfully!";
-            return RedirectToAction(nameof(Index));
-        }
-    }
-
-    public class Client
-    {
-        public int ClientId { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string ContactDetails { get; set; } = string.Empty;
-        public string Region { get; set; } = string.Empty;
     }
 }
